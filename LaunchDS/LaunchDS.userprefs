@@ -1,0 +1,24 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="MainLite.cs">
+    <Files>
+      <File FileName="MainLite.cs" Line="242" Column="48" />
+      <File FileName="LaunchDSMultiPlatform\MainWindow.cs" Line="13" Column="23" />
+      <File FileName="LaunchDSMultiPlatform\Program.cs" Line="1" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="LaunchDS" expanded="True">
+            <Node name="MainLite.cs" selected="True" />
+          </Node>
+          <Node name="LaunchDSMultiPlatform" expanded="True" />
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
