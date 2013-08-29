@@ -11,5 +11,8 @@ this project is not the best. A lot of clean up needs to
 be done.
 
 Some sections of this code where taken from other projects
-on GitHub. I will try to update this page soon with a list 
-of those projects.
+on GitHub:
+
+Digiex - http://github.com/Digiex/MCLauncher.NET
+
+Just used some of the summed up HTTP request and response code
