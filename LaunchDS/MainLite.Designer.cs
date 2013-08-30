@@ -33,7 +33,6 @@
             this.txt_Username = new System.Windows.Forms.TextBox();
             this.txt_Password = new System.Windows.Forms.TextBox();
             this.btn_Update = new System.Windows.Forms.Button();
-            this.txt_Status = new System.Windows.Forms.TextBox();
             this.btn_Settings = new System.Windows.Forms.Button();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.CB_Config = new System.Windows.Forms.ComboBox();
@@ -79,16 +78,6 @@
             this.btn_Update.UseVisualStyleBackColor = true;
             this.btn_Update.Click += new System.EventHandler(this.btn_Update_Click);
             // 
-            // txt_Status
-            // 
-            this.txt_Status.Location = new System.Drawing.Point(369, 358);
-            this.txt_Status.Name = "txt_Status";
-            this.txt_Status.ReadOnly = true;
-            this.txt_Status.Size = new System.Drawing.Size(121, 20);
-            this.txt_Status.TabIndex = 5;
-            this.txt_Status.Text = "Status: Client Good";
-            this.txt_Status.TextChanged += new System.EventHandler(this.txt_Status_TextChanged);
-            // 
             // btn_Settings
             // 
             this.btn_Settings.Location = new System.Drawing.Point(496, 357);
@@ -124,7 +113,6 @@
             this.Controls.Add(this.CB_Config);
             this.Controls.Add(this.webBrowser1);
             this.Controls.Add(this.btn_Settings);
-            this.Controls.Add(this.txt_Status);
             this.Controls.Add(this.btn_Update);
             this.Controls.Add(this.txt_Password);
             this.Controls.Add(this.txt_Username);
@@ -147,7 +135,6 @@
         private System.Windows.Forms.TextBox txt_Username;
         private System.Windows.Forms.TextBox txt_Password;
         private System.Windows.Forms.Button btn_Update;
-        private System.Windows.Forms.TextBox txt_Status;
         private System.Windows.Forms.Button btn_Settings;
         private System.Windows.Forms.WebBrowser webBrowser1;
         private System.Windows.Forms.ComboBox CB_Config;

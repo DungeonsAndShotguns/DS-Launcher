@@ -32,7 +32,7 @@ namespace LaunchDS
 
         private void btn_launch_Click(object sender, EventArgs e)
         {
-            txt_Status.Text = "Status: Launching DS Minecraft";
+            
             Application.DoEvents();
 
             MojangLogin LoginStatus = new MojangLogin();
@@ -124,7 +124,7 @@ namespace LaunchDS
                         {
                             if (ex.ToString().Contains("The system cannot find the file specified") == true)
                             {
-                                txt_Status.Text = "Status:Could not find java plaese set path in settings";
+                                // add titles
                             }
                         }
 
@@ -144,12 +144,12 @@ namespace LaunchDS
                 }
                 else
                 {
-                    txt_Status.Text = "Status: Client has not been installed. Please use the update button.";
+                    //txt_Status.Text = "Status: Client has not been installed. Please use the update button.";
                 }
             }
             else
             {
-                txt_Status.Text = "Status: Login faild plaese try again.";
+                //txt_Status.Text = "Status: Login faild plaese try again.";
             }
 
             LoginStatus.Close();
@@ -157,7 +157,7 @@ namespace LaunchDS
 
         private void btn_Update_Click(object sender, EventArgs e)
         {
-            txt_Status.Text = "Status: Updating";
+            //txt_Status.Text = "Status: Updating";
             Application.DoEvents();
 
             MojangLogin LoginStatus = new MojangLogin();
@@ -178,7 +178,7 @@ namespace LaunchDS
                     Program.MCInfo = MinecraftStatic.LoginCheck(txt_Username.Text, txt_Password.Text);
                 }
 
-                txt_Status.Text = "Status: Checking for current DS Clinet version.";
+                //txt_Status.Text = "Status: Checking for current DS Clinet version.";
 
                 if (Program.MCInfo.LoginPassed == true)
                 {
@@ -189,7 +189,7 @@ namespace LaunchDS
                 else
                 {
                     LoginStatus.Close();
-                    txt_Status.Text = "Status: Login faild plaese try again.";
+                    //txt_Status.Text = "Status: Login faild plaese try again.";
                 }
             }
         }
@@ -199,6 +199,11 @@ namespace LaunchDS
             if (txt_Username.Text == "User Name")
             {
                 txt_Username.Clear();
+            }
+
+            if (Program.MCInfo.UserName != this.Text)
+            {
+                Program.MCInfo.LoginPassed = false;
             }
         }
 
@@ -214,11 +219,14 @@ namespace LaunchDS
         {
             DSHelpper.FileStuctureCheck CheckFiles = new DSHelpper.FileStuctureCheck();
 
-            //txt_Status.Text = "Status: " + Program.CheckVersion();
+            if (Program.CurrentVersion != Program.CheckVersion())
+            {
+                this.Text = "DS Launcher - Client is out of date";
+            }
 
             if (CheckFiles.Check() == false)
             {
-                txt_Status.Text ="Status: DS Client has not been installed correclty. Please use the update button.";
+                this.Text = "DS Launcher - not been installed correclty.";
 
             }
 
