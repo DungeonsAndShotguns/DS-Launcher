@@ -28,7 +28,7 @@ namespace MCHelper
 
         public Profile() { }
 
-        public void LoadProfile(string ProfileDir)
+        public Profile LoadProfile(string ProfileDir)
         {
             if (System.IO.Directory.Exists(ProfileDir) == true)
             {
@@ -90,6 +90,8 @@ namespace MCHelper
                     }
                 }
             }
+
+            return this;
         }
     }
 }

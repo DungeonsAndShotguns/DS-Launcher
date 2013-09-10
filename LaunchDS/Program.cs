@@ -21,6 +21,8 @@ namespace LaunchDS
         public static string CurrentVersion = string.Empty;
         public static Addon CurrentAddon = new Addon();
 
+        public static List<MCHelper.Profile> Profiles = new List<MCHelper.Profile>();
+
         public static string VersionFileURL = null;
         public static string AddonsURL = null;
         public static string NewsURL = null;
@@ -152,6 +154,18 @@ namespace LaunchDS
 
             
             
+        }
+
+        public void LoadProfiles()
+        {
+            //MCHelper.Profile TempProfile = null;
+
+            foreach(string CurrentDir in Directory.GetDirectories(Directory.GetCurrentDirectory() + "\\data"))
+            {
+                //TempProfile = new MCHelper.Profile();
+
+                Program.Profiles.Add(new MCHelper.Profile().LoadProfile(CurrentDir));
+            }
         }
     }
 }
