@@ -239,14 +239,18 @@ namespace LaunchDS
 
             DSHelpper.FileStuctureCheck CheckFiles = new DSHelpper.FileStuctureCheck();
 
-            if (Program.CurrentVersion != Program.CheckVersion())
+            if( !Program.CheckVersion().ToLower().Contains( "version good" ) )
             {
-                this.Text = "DS Launcher - Client is out of date";
+                this.Text = "DS Launcher - [Client update is required]";
+            }
+            else
+            {
+                this.Text = "DS Launcher";
             }
 
             if (CheckFiles.Check() == false)
             {
-                this.Text = "DS Launcher - not been installed correclty.";
+                this.Text = "DS Launcher - [Client is not correclty installed]";
 
             }
 
