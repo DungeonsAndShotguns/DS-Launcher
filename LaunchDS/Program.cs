@@ -176,12 +176,18 @@ namespace LaunchDS
         public static void LoadProfiles()
         {
             //MCHelper.Profile TempProfile = null;
-
-            foreach(string CurrentDir in Directory.GetDirectories(Directory.GetCurrentDirectory() + "\\data"))
+            try
             {
-                //TempProfile = new MCHelper.Profile();
+                foreach( string CurrentDir in Directory.GetDirectories( Directory.GetCurrentDirectory() + "\\data" ) )
+                {
+                    //TempProfile = new MCHelper.Profile();
 
-                Program.Profiles.Add(new MCHelper.Profile().LoadProfile(CurrentDir));
+                    Program.Profiles.Add( new MCHelper.Profile().LoadProfile( CurrentDir ) );
+                }
+            }
+            catch( Exception e )
+            {
+                //whaaat?
             }
         }
     }

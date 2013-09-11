@@ -175,45 +175,6 @@ namespace LaunchDS
             LoginStatus.Close();
         }
 
-        private void btn_Update_Click(object sender, EventArgs e)
-        {
-            //txt_Status.Text = "Status: Updating";
-            Application.DoEvents();
-
-            MojangLogin LoginStatus = new MojangLogin();
-
-            LoginStatus.Show();
-            Application.DoEvents();
-
-            if (Program.BypassLoginCheck == true)
-            {
-                LoginStatus.Close();
-                UpdateProgress Progress = new UpdateProgress();
-                Progress.ShowDialog();
-            }
-            else
-            {
-                if (Program.MCInfo.LoginPassed == false)
-                {
-                    Program.MCInfo = MinecraftStatic.LoginCheck(txt_Username.Text, txt_Password.Text);
-                }
-
-                //txt_Status.Text = "Status: Checking for current DS Clinet version.";
-
-                if (Program.MCInfo.LoginPassed == true)
-                {
-                    LoginStatus.Close();
-                    UpdateProgress Progress = new UpdateProgress();
-                    Progress.ShowDialog();
-                }
-                else
-                {
-                    LoginStatus.Close();
-                    //txt_Status.Text = "Status: Login faild plaese try again.";
-                }
-            }
-        }
-
         private void txt_Username_Click(object sender, EventArgs e)
         {
             if (txt_Username.Text == "User Name")
