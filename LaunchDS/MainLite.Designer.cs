@@ -40,6 +40,7 @@
             // 
             // btn_launch
             // 
+            this.btn_launch.Enabled = false;
             this.btn_launch.Location = new System.Drawing.Point(658, 357);
             this.btn_launch.Name = "btn_launch";
             this.btn_launch.Size = new System.Drawing.Size(75, 23);

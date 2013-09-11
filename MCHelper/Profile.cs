@@ -73,6 +73,10 @@ namespace MCHelper
                                         {
                                             Type = GameType.Minecraft;
                                         }
+                                        else if (TempPair[1] == "Information")
+                                        {
+                                            Type = GameType.Information;
+                                        }
                                         else
                                         {
                                             Type = GameType.Other;

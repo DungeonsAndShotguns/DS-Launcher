@@ -283,6 +283,15 @@ namespace LaunchDS
                 btn_Settings.Enabled = false;
             }
 
+            if (CurrentProfile.Type == MCHelper.GameType.Information)
+            {
+                btn_launch.Enabled = false;
+            }
+            else
+            {
+                btn_launch.Enabled = true;
+            }
+
             if (CurrentProfile.DescriptionURL != null)
             {
                 webBrowser1.Navigate(CurrentProfile.DescriptionURL);
