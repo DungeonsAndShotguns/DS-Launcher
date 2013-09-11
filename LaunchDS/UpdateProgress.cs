@@ -14,6 +14,7 @@ namespace LaunchDS
 {
     public partial class UpdateProgress : Form
     {
+        public string ProfileDir = string.Empty;
         string CurrentDir = Directory.GetCurrentDirectory();
         string RawReponse = string.Empty;
         string TempDir = Directory.GetCurrentDirectory() + "\\Cache\\" + System.DateTime.Now.Month + System.DateTime.Now.Day + System.DateTime.Now.Year + System.DateTime.Now.Hour + System.DateTime.Now.Minute;
@@ -81,7 +82,7 @@ namespace LaunchDS
 
             Process RunInstaller = new Process();
             RunInstaller.StartInfo.FileName = TempDir + "\\" + Contents;
-            RunInstaller.StartInfo.Arguments = "/S /D=" + CurrentDir;
+            RunInstaller.StartInfo.Arguments = "/S /D=" + CurrentDir + "\\data\\" + ProfileDir;
             RunInstaller.Start();
             RunInstaller.WaitForExit();
 
@@ -100,7 +101,7 @@ namespace LaunchDS
             UpdateCurrentProgress("Removing unneeded files, backups will still remain.");
             File.Delete(TempDir + "\\" + Contents[1]);
 
-            Program.CheckVersion();
+            Program.CheckVersion(ProfileDir);
 
             DoUpdate();
         }
@@ -109,8 +110,6 @@ namespace LaunchDS
         {
             UpdateCurrentProgress("Getting Update Info");
 
-            //RawReponse = NetHelper.Download("http://dungeonsandshotguns.org/dsmember/DownloadFile.txt");
-            //Contents = RawReponse.Split(new char[1] { ';' });
 
             //bool FoundCurrentVersion = false;
             int CurrentVersionLocation = 0;
@@ -171,7 +170,7 @@ namespace LaunchDS
 
         private void UpdateProgress_Load(object sender, EventArgs e)
         {
-            lbl_UpdateStatus.Text = Program.CheckVersion();
+            lbl_UpdateStatus.Text = Program.CheckVersion(ProfileDir);
         }
 
         private void UpdateProgress_Activated(object sender, EventArgs e)

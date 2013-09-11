@@ -58,30 +58,35 @@ namespace LaunchDS
 
         }
 
-        public static string CheckVersion()
+        public static string CheckVersion(string ProfileDir)
         {
+            MCHelper.Profile CurrentProfile = new MCHelper.Profile();
+            CurrentProfile.LoadProfile(Directory.GetCurrentDirectory() + "\\Data\\" + ProfileDir);
+
+
             //string CurrentVersion = string.Empty;
             string RemoteVersion = string.Empty;
 
-            try
-            {
-                using (StreamReader VersionFile = new StreamReader("Version.txt"))
-                {
-                    CurrentVersion = VersionFile.ReadToEnd();
-                }
-            }
-            catch (Exception e)
-            {
-                if (e.ToString().Contains("zzz"))
-                {
+            //try
+            //{
+                //using (StreamReader VersionFile = new StreamReader(ProfileDir + "\\Version.txt"))
+                //{
+            CurrentVersion = CurrentProfile.CurrentVersion;
+                //}
+            //}
+            //catch (Exception e)
+            //{
+             //   if (e.ToString().Contains("zzz"))
+              //  {
                     //do soemthing
-                }
+               // }
                 //TODO: Handle Exception
-            }
+            //}
 
             Releases.Clear();
 
-            string Versions = NetHelper.Download(VersionFileURL);
+            //string Versions = NetHelper.Download(VersionFileURL);
+            string Versions = NetHelper.Download(CurrentProfile.UpdateURL);
 
             string[] Releasesx = Versions.Split(new string[] { "\n" }, StringSplitOptions.None);
 

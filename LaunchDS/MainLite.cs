@@ -34,6 +34,7 @@ namespace LaunchDS
         {
             // Get the current profile
             MCHelper.Profile CurrentProfile = new MCHelper.Profile();
+            CurrentProfile = (MCHelper.Profile)CB_Config.SelectedItem;
 
             // Do Login if needed
             if (CurrentProfile.Typelogin == MCHelper.LoginType.None)
@@ -74,16 +75,17 @@ namespace LaunchDS
             }
 
             // check the version
-            if (!Program.CheckVersion().ToLower().Contains("version good"))
+            if (Program.CheckVersion(CurrentProfile.GameDir).ToLower().Contains("version good") == false)
             {
                 //Update Required
                 UpdateProgress Progress = new UpdateProgress();
+                Progress.ProfileDir = CurrentProfile.GameDir;
                 Progress.ShowDialog();
             }
             
             
             // launch the app
-            string ProfileRoot = "\"" + Directory.GetCurrentDirectory() + "\\data\\" + CurrentProfile.GameDir;
+            string ProfileRoot = Directory.GetCurrentDirectory() + "\\data\\" + CurrentProfile.GameDir;
 
             if (CurrentProfile.Type == MCHelper.GameType.Minecraft)
             {
@@ -127,12 +129,18 @@ namespace LaunchDS
                     Minecraft.StartInfo.FileName = "java";
                 }
 
-                Minecraft.StartInfo.Arguments = "-Xms" + Program.AppSettings.MinMemory + "M -Xmx" + Program.AppSettings.MaxMemory + "M -Djava.library.path=" + ProfileRoot + ".minecraft/bin/natives\" -cp " + ProfileRoot + ".minecraft/bin/minecraft.jar\";" + ProfileRoot + ".minecraft/bin/jinput.jar\";" + ProfileRoot + ".minecraft/bin/lwjgl.jar\";" + ProfileRoot + ".minecraft/bin/lwjgl_util.jar\" net.minecraft.client.Minecraft " + Program.MCInfo.UserName + " " + Program.MCInfo.SessionID;
+                //ProfileRoot = ProfileRoot.Replace('\\', '/');
+                string DSMinecraftDir = "\"" + Directory.GetCurrentDirectory() + "\\data\\" + CurrentProfile.GameDir + "\\";
+                Minecraft.StartInfo.Arguments = "-Xms" + Program.AppSettings.MinMemory + "M -Xmx" + Program.AppSettings.MaxMemory + "M -Djava.library.path=" + DSMinecraftDir + ".minecraft/bin/natives\" -cp " + DSMinecraftDir + ".minecraft/bin/minecraft.jar\";" + DSMinecraftDir + ".minecraft/bin/jinput.jar\";" + DSMinecraftDir + ".minecraft/bin/lwjgl.jar\";" + DSMinecraftDir + ".minecraft/bin/lwjgl_util.jar\" net.minecraft.client.Minecraft " + Program.MCInfo.UserName + " " + Program.MCInfo.SessionID;
+
+                //Minecraft.StartInfo.Arguments = "-Xms" + Program.AppSettings.MinMemory + "M -Xmx" + Program.AppSettings.MaxMemory + 
+                  //  "M -Djava.library.path=" + ProfileRoot + "/bin/natives\" -cp " + ProfileRoot + "/bin/minecraft.jar\";" + ProfileRoot + "/bin/jinput.jar\";" + ProfileRoot + "/bin/lwjgl.jar\";" + ProfileRoot + "/bin/lwjgl_util.jar\" net.minecraft.client.Minecraft " + 
+                    //Program.MCInfo.UserName + " " + Program.MCInfo.SessionID;
                 Console.WriteLine(Minecraft.StartInfo.Arguments);
                 Minecraft.StartInfo.RedirectStandardOutput = false;
                 Minecraft.StartInfo.UseShellExecute = false;
                 Minecraft.StartInfo.EnvironmentVariables.Remove("APPDATA");
-                Minecraft.StartInfo.EnvironmentVariables.Add("APPDATA", Directory.GetCurrentDirectory() + "\\data\\");
+                Minecraft.StartInfo.EnvironmentVariables.Add("APPDATA", ProfileRoot);
 
                 try
                 {
@@ -180,22 +188,22 @@ namespace LaunchDS
             // bind the profile box to the profil selector
             CB_Config.Items.AddRange(Program.Profiles.ToArray());
 
-            DSHelpper.FileStuctureCheck CheckFiles = new DSHelpper.FileStuctureCheck();
+            //DSHelpper.FileStuctureCheck CheckFiles = new DSHelpper.FileStuctureCheck();
 
-            if( !Program.CheckVersion().ToLower().Contains( "version good" ) )
-            {
-                this.Text = "DS Launcher - [Client update is required]";
-            }
-            else
-            {
-                this.Text = "DS Launcher";
-            }
+            //if( !Program.CheckVersion().ToLower().Contains( "version good" ) )
+            //{
+            //    this.Text = "DS Launcher - [Client update is required]";
+            //}
+            //else
+            //{
+            //    this.Text = "DS Launcher";
+            //}
 
-            if (CheckFiles.Check() == false)
-            {
-                this.Text = "DS Launcher - [Client is not correclty installed]";
+            //if (CheckFiles.Check() == false)
+            //{
+            //    this.Text = "DS Launcher - [Client is not correclty installed]";
 
-            }
+            //}
 
             if (string.IsNullOrEmpty(Program.AppSettings.GetSetting("LastLogin")) == false)
             {

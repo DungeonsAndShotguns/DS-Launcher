@@ -110,7 +110,7 @@ namespace LaunchDS
             UpdateProgress("Removing unneeded files, backups will still remain.");
             File.Delete(TempDir + "\\" + Contents[1]);
 
-            Program.CheckVersion();
+            Program.CheckVersion(ProfileDir);
 
             DoUpdate();
         }
