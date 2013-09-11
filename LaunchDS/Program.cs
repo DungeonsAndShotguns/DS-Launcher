@@ -72,6 +72,10 @@ namespace LaunchDS
             }
             catch (Exception e)
             {
+                if (e.ToString().Contains("zzz"))
+                {
+                    //do soemthing
+                }
                 //TODO: Handle Exception
             }
 
@@ -88,6 +92,7 @@ namespace LaunchDS
 
             int CurrentVersionNum = 0;
             bool FoundCurrentVersion = false;
+            string LatestVersion = "";
 
             foreach (DataRow CurrentRow in Releases.Rows)
             {
@@ -98,18 +103,27 @@ namespace LaunchDS
                 if (CurrentRow["ReleaseNumber"].ToString() == CurrentVersion)
                 {
                     FoundCurrentVersion = true;
+                    break;
                 }
+                LatestVersion = CurrentRow[ "ReleaseNumber" ].ToString();
             }
 
             if (CurrentVersionNum != Releases.Rows.Count)
             {
-                return "Click to start update. There is a newer version of the DS Client.\nYour Version:" + CurrentVersion + " Current Version" + Releases.Rows[Releases.Rows.Count - 1]["ReleaseNumber"];
+                //return latest version
+                return LatestVersion;
             }
             else
             {
-                return "Version Good";
+                return "Version Good: " + LatestVersion;
             }
         }
+
+
+
+
+
+
 
         public static void LoadURL()
         {

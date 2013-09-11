@@ -53,6 +53,26 @@ namespace LaunchDS
                 Program.AppSettings.UpdateSetting("LastLogin", txt_Username.Text);
 
 
+
+                if( !Program.CheckVersion().ToLower().Contains( "version good" ) )
+                {
+                    //Update Required
+                    UpdateProgress Progress = new UpdateProgress();
+                    Progress.ShowDialog();
+                }
+                //else, no update required, continue with launch.
+
+
+
+
+
+
+
+
+
+
+
+
                 string DSMinecraftDir = "\"" + Directory.GetCurrentDirectory() + "\\data\\";
 
                 if (File.Exists(Directory.GetCurrentDirectory() + "\\data\\.minecraft\\bin\\minecraft.jar") == true)

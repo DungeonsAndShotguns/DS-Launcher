@@ -64,7 +64,7 @@ namespace LaunchDS
 
                     foreach (FileInfo CurrentFile in Files)
                     {
-                        CurrentFile.CopyTo(BackUpDir + CurrentFile.Name);
+                        CurrentFile.CopyTo(BackUpDir + CurrentFile.Name, true);
                     }
                 }
 
@@ -199,7 +199,10 @@ namespace LaunchDS
 
         private void UpdateProgress_Shown(object sender, EventArgs e)
         {
-            lbl_UpdateStatus.Text = "Click here to start. " + Program.CheckVersion();
+            lbl_UpdateStatus.Text = "Update Required. Click Here to start.";
+                //"Update required.\n" +
+                //"Your Version: " + CurrentVersion + "\n" +
+                //"Current Version: " + Releases.Rows[Releases.Rows.Count - 1]["ReleaseNumber"];
         }
     }
 }
