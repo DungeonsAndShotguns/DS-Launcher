@@ -32,10 +32,10 @@
             this.btn_launch = new System.Windows.Forms.Button();
             this.txt_Username = new System.Windows.Forms.TextBox();
             this.txt_Password = new System.Windows.Forms.TextBox();
-            this.btn_Update = new System.Windows.Forms.Button();
             this.btn_Settings = new System.Windows.Forms.Button();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.CB_Config = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // btn_launch
@@ -69,20 +69,10 @@
             this.txt_Password.Click += new System.EventHandler(this.txt_Password_Click);
             this.txt_Password.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txt_Password_KeyDown);
             // 
-            // btn_Update
-            // 
-            this.btn_Update.Location = new System.Drawing.Point(577, 357);
-            this.btn_Update.Name = "btn_Update";
-            this.btn_Update.Size = new System.Drawing.Size(75, 23);
-            this.btn_Update.TabIndex = 3;
-            this.btn_Update.Text = "Update";
-            this.btn_Update.UseVisualStyleBackColor = true;
-            this.btn_Update.Click += new System.EventHandler(this.btn_Update_Click);
-            // 
             // btn_Settings
             // 
             this.btn_Settings.Enabled = false;
-            this.btn_Settings.Location = new System.Drawing.Point(496, 357);
+            this.btn_Settings.Location = new System.Drawing.Point(577, 357);
             this.btn_Settings.Name = "btn_Settings";
             this.btn_Settings.Size = new System.Drawing.Size(75, 23);
             this.btn_Settings.TabIndex = 7;
@@ -102,21 +92,30 @@
             // CB_Config
             // 
             this.CB_Config.FormattingEnabled = true;
-            this.CB_Config.Location = new System.Drawing.Point(226, 360);
+            this.CB_Config.Location = new System.Drawing.Point(272, 360);
             this.CB_Config.Name = "CB_Config";
-            this.CB_Config.Size = new System.Drawing.Size(121, 21);
+            this.CB_Config.Size = new System.Drawing.Size(182, 21);
             this.CB_Config.TabIndex = 9;
             this.CB_Config.SelectedIndexChanged += new System.EventHandler(this.CB_Config_SelectedIndexChanged);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(225, 363);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(41, 13);
+            this.label1.TabIndex = 10;
+            this.label1.Text = "Profiles";
             // 
             // MainLite
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(745, 390);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.CB_Config);
             this.Controls.Add(this.webBrowser1);
             this.Controls.Add(this.btn_Settings);
-            this.Controls.Add(this.btn_Update);
             this.Controls.Add(this.txt_Password);
             this.Controls.Add(this.txt_Username);
             this.Controls.Add(this.btn_launch);
@@ -137,9 +136,9 @@
         private System.Windows.Forms.Button btn_launch;
         private System.Windows.Forms.TextBox txt_Username;
         private System.Windows.Forms.TextBox txt_Password;
-        private System.Windows.Forms.Button btn_Update;
         private System.Windows.Forms.Button btn_Settings;
         private System.Windows.Forms.WebBrowser webBrowser1;
         private System.Windows.Forms.ComboBox CB_Config;
+        private System.Windows.Forms.Label label1;
     }
 }
