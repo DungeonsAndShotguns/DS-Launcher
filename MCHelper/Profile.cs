@@ -10,6 +10,11 @@ namespace MCHelper
         Minecraft, Information, Other
 	}
 
+    public enum LoginType
+    {
+        Minecraft, PHPBB, None
+    }
+
     public class Profile
     {
         public string GameName { get; set; }
@@ -19,6 +24,7 @@ namespace MCHelper
         public string DescriptionURL { get; set; }
         public GameType Type { get; set; }
         public string CommandLineArgs { get; set; }
+        public LoginType Typelogin { get; set; }
 
         // Minecraft Settings
         int MaxMem { get; set; }
@@ -84,6 +90,20 @@ namespace MCHelper
                                         break;
                                     case "CommandLineArgs":
                                         CommandLineArgs = TempPair[1];
+                                        break;
+                                    case "LoginType":
+                                        if (TempPair[1] == "Minecraft")
+                                        {
+                                            Typelogin = LoginType.Minecraft;
+                                        }
+                                        else if (TempPair[1] == "phpbb")
+                                        {
+                                            Typelogin = LoginType.PHPBB;
+                                        }
+                                        else
+                                        {
+                                            Typelogin = LoginType.None;
+                                        }
                                         break;
                                     default:
                                         // Line not included

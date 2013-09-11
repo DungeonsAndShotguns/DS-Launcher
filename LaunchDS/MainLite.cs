@@ -32,18 +32,53 @@ namespace LaunchDS
 
         private void btn_launch_Click(object sender, EventArgs e)
         {
-            
-            Application.DoEvents();
+            MCHelper.Profile CurrentProfile = new MCHelper.Profile();
 
-            MojangLogin LoginStatus = new MojangLogin();
-
-            LoginStatus.Show();
-            Application.DoEvents();
-
-            if (Program.MCInfo.LoginPassed == false)
+            // Do Login if needed
+            if (CurrentProfile.Typelogin == MCHelper.LoginType.None)
             {
-                Program.MCInfo = MinecraftStatic.LoginCheck(txt_Username.Text, txt_Password.Text);
+                // Skip Login
             }
+            else
+            {
+                Application.DoEvents();
+
+                MojangLogin LoginStatus = new MojangLogin();
+
+                LoginStatus.Show();
+                Application.DoEvents();
+
+                if(CurrentProfile.Typelogin == MCHelper.LoginType.Minecraft)
+                {
+                    if (Program.MCInfo.LoginPassed == false)
+                    {
+                        Program.MCInfo = MinecraftStatic.LoginCheck(txt_Username.Text, txt_Password.Text);
+                    }
+
+                    if (Program.MCInfo.LoginPassed == true)
+                    {
+                        LoginStatus.Close();
+                        Program.AppSettings.UpdateSetting("LastLogin", txt_Username.Text);
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+                else if (CurrentProfile.Typelogin == MCHelper.LoginType.PHPBB)
+                {
+                    // skip for now
+                }
+            }
+
+            if (!Program.CheckVersion().ToLower().Contains("version good"))
+            {
+                //Update Required
+                UpdateProgress Progress = new UpdateProgress();
+                Progress.ShowDialog();
+            }
+            
+            
 
             if (Program.MCInfo.LoginPassed == true)
             {
@@ -173,6 +208,7 @@ namespace LaunchDS
             }
 
             LoginStatus.Close();
+
         }
 
         private void txt_Username_Click(object sender, EventArgs e)
