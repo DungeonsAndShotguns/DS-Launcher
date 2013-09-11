@@ -32,6 +32,7 @@ namespace LaunchDS
 
         private void btn_launch_Click(object sender, EventArgs e)
         {
+            // Get the current profile
             MCHelper.Profile CurrentProfile = new MCHelper.Profile();
 
             // Do Login if needed
@@ -62,6 +63,7 @@ namespace LaunchDS
                     }
                     else
                     {
+                        LoginStatus.Close();
                         return;
                     }
                 }
@@ -71,6 +73,7 @@ namespace LaunchDS
                 }
             }
 
+            // check the version
             if (!Program.CheckVersion().ToLower().Contains("version good"))
             {
                 //Update Required
@@ -79,136 +82,76 @@ namespace LaunchDS
             }
             
             
+            // launch the app
+            string ProfileRoot = "\"" + Directory.GetCurrentDirectory() + "\\data\\" + CurrentProfile.GameDir;
 
-            if (Program.MCInfo.LoginPassed == true)
+            if (CurrentProfile.Type == MCHelper.GameType.Minecraft)
             {
-                LoginStatus.Close();
-                //lbl_Status.Text = "Passed";
-                //MessageBox.Show("Passed");
-                Program.AppSettings.UpdateSetting("LastLogin", txt_Username.Text);
+                //if (Program.AppSettings.GetSetting("ClassicLaunch") == "True")
+                //{
+                //    Process Minecraft = new Process();
+                //    Minecraft.StartInfo.FileName = "minecraftp.bat";
+                //    //Minecraft.StartInfo.Arguments = "--username=" + Program.MCInfo.UserName + " --password=" + Program.MCInfo.Password;
+                //    Minecraft.StartInfo.Arguments = Program.MCInfo.UserName + " " + Program.MCInfo.Password;
+                //    Minecraft.StartInfo.RedirectStandardOutput = true;
+                //    //Minecraft.StartInfo.CreateNoWindow = true;
+                //    Minecraft.StartInfo.UseShellExecute = false;
+                //    Minecraft.Start();
+                //}
 
-
-
-                if( !Program.CheckVersion().ToLower().Contains( "version good" ) )
+                // checking for the minecraft jar
+                if (File.Exists(ProfileRoot + "\\bin\\minecraft.jar") == false)
                 {
-                    //Update Required
-                    UpdateProgress Progress = new UpdateProgress();
-                    Progress.ShowDialog();
+                    return;
                 }
-                //else, no update required, continue with launch.
 
-
-
-
-
-
-
-
-
-
-
-
-                string DSMinecraftDir = "\"" + Directory.GetCurrentDirectory() + "\\data\\";
-
-                if (File.Exists(Directory.GetCurrentDirectory() + "\\data\\.minecraft\\bin\\minecraft.jar") == true)
+                try
                 {
-                    if (Program.AppSettings.GetSetting("ClassicLaunch") == "True")
-                    {
-                        Process Minecraft = new Process();
-                        Minecraft.StartInfo.FileName = "minecraftp.bat";
-                        //Minecraft.StartInfo.Arguments = "--username=" + Program.MCInfo.UserName + " --password=" + Program.MCInfo.Password;
-                        Minecraft.StartInfo.Arguments = Program.MCInfo.UserName + " " + Program.MCInfo.Password;
-                        Minecraft.StartInfo.RedirectStandardOutput = true;
-                        //Minecraft.StartInfo.CreateNoWindow = true;
-                        Minecraft.StartInfo.UseShellExecute = false;
-                        Minecraft.Start();
-                    }
-                    else
-                    {
-                        try
-                        {
-                            Program.AppSettings.MaxMemory = Convert.ToInt32(Program.AppSettings.GetSetting("MemMax"));
-                            Program.AppSettings.MinMemory = Convert.ToInt32(Program.AppSettings.GetSetting("MemMin"));
-                        }
-                        catch
-                        {
-                            Program.AppSettings.MaxMemory = 2046;
-                            Program.AppSettings.MinMemory =2046;
-                        }
+                    Program.AppSettings.MaxMemory = Convert.ToInt32(Program.AppSettings.GetSetting("MemMax"));
+                    Program.AppSettings.MinMemory = Convert.ToInt32(Program.AppSettings.GetSetting("MemMin"));
+                }
+                catch
+                {
+                    Program.AppSettings.MaxMemory = 2046;
+                    Program.AppSettings.MinMemory = 2046;
+                }
 
-                        Process Minecraft = new Process();
+                Process Minecraft = new Process();
 
-                        if (Program.AppSettings.GetSetting("JavaPath") != string.Empty)
-                        {
-                            Minecraft.StartInfo.FileName = Program.AppSettings.GetSetting("JavaPath");
-                        }
-                        else
-                        {
-                            Minecraft.StartInfo.FileName = "java";
-                        }
-
-
-
-                        //string args = "-Xincgc -Xmx1024m -cp \"%APPDATA%\\.minecraft\\bin\\minecraft.jar;%APPDATA%\\.minecraft\\bin\\lwjgl.jar;%APPDATA%\\.minecraft\\bin\\lwjgl_util.jar;%APPDATA%\\.minecraft\\bin\\jinput.jar\" -Djava.library.path=\"%APPDATA%\\.minecraft\\bin\\natives\" net.minecraft.client.Minecraft \"NAME\"";
-                        //string args = "-Xincgc -Xmx1024m -cp \"" + DSMinecraftDir + "\\.minecraft\\bin\\minecraft.jar;" + DSMinecraftDir + "\\.minecraft\\bin\\lwjgl.jar;" + DSMinecraftDir + "\\.minecraft\\bin\\lwjgl_util.jar;" + DSMinecraftDir + "\\.minecraft\\bin\\jinput.jar\" -Djava.library.path=\"" + DSMinecraftDir + "\\.minecraft\\bin\\natives\" net.minecraft.client.Minecraft \"NAME\"";
-                        Minecraft.StartInfo.Arguments = "-Xms" + Program.AppSettings.MinMemory + "M -Xmx" + Program.AppSettings.MaxMemory + "M -Djava.library.path=" + DSMinecraftDir + ".minecraft/bin/natives\" -cp " + DSMinecraftDir + ".minecraft/bin/minecraft.jar\";" + DSMinecraftDir + ".minecraft/bin/jinput.jar\";" + DSMinecraftDir + ".minecraft/bin/lwjgl.jar\";" + DSMinecraftDir + ".minecraft/bin/lwjgl_util.jar\" net.minecraft.client.Minecraft " + Program.MCInfo.UserName + " " + Program.MCInfo.SessionID;
-                        Console.WriteLine(Minecraft.StartInfo.Arguments);
-                        Minecraft.StartInfo.RedirectStandardOutput = false;
-                        //Minecraft.StartInfo.Arguments = Environment.ExpandEnvironmentVariables(args);
-                        //Minecraft.StartInfo.CreateNoWindow = true;
-                        //Minecraft.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                        Minecraft.StartInfo.UseShellExecute = false;
-                        //Minecraft.StartInfo.RedirectStandardOutput = false;
-                        Minecraft.StartInfo.EnvironmentVariables.Remove("APPDATA");
-                        Minecraft.StartInfo.EnvironmentVariables.Add("APPDATA", Directory.GetCurrentDirectory() + "\\data\\");
-
-                        //do
-                        //{
-                        //    Thread.Sleep(500);
-                        //    //Console.Out.Write( Minecraft.StandardOutput.ReadToEnd() );
-                       //}
-                       //while (!Minecraft.HasExited);
-                        //catch any leftovers in redirected stdout
-                        //Console.Out.Write( Minecraft.StandardOutput.ReadToEnd() );
-
-                        try
-                        {
-                            Minecraft.Start();
-                        }
-                        catch (Exception ex)
-                        {
-                            if (ex.ToString().Contains("The system cannot find the file specified") == true)
-                            {
-                                // add titles
-                            }
-                        }
-
-                        //ConsoleRedirect.Close();
-                        //ConsoleRedirect.Dispose();
-                    }
-
-                    if (Program.AppSettings.GetSetting("CloseOnLaunch") != string.Empty)
-                    {
-                        if (Program.AppSettings.GetSetting("CloseOnLaunch") == "True")
-                        {
-                            this.Close();
-                        }
-
-                        // skipping close
-                    }
+                if (Program.AppSettings.GetSetting("JavaPath") != string.Empty)
+                {
+                    Minecraft.StartInfo.FileName = Program.AppSettings.GetSetting("JavaPath");
                 }
                 else
                 {
-                    //txt_Status.Text = "Status: Client has not been installed. Please use the update button.";
+                    Minecraft.StartInfo.FileName = "java";
+                }
+
+                Minecraft.StartInfo.Arguments = "-Xms" + Program.AppSettings.MinMemory + "M -Xmx" + Program.AppSettings.MaxMemory + "M -Djava.library.path=" + ProfileRoot + ".minecraft/bin/natives\" -cp " + ProfileRoot + ".minecraft/bin/minecraft.jar\";" + ProfileRoot + ".minecraft/bin/jinput.jar\";" + ProfileRoot + ".minecraft/bin/lwjgl.jar\";" + ProfileRoot + ".minecraft/bin/lwjgl_util.jar\" net.minecraft.client.Minecraft " + Program.MCInfo.UserName + " " + Program.MCInfo.SessionID;
+                Console.WriteLine(Minecraft.StartInfo.Arguments);
+                Minecraft.StartInfo.RedirectStandardOutput = false;
+                Minecraft.StartInfo.UseShellExecute = false;
+                Minecraft.StartInfo.EnvironmentVariables.Remove("APPDATA");
+                Minecraft.StartInfo.EnvironmentVariables.Add("APPDATA", Directory.GetCurrentDirectory() + "\\data\\");
+
+                try
+                {
+                    Minecraft.Start();
+                }
+                catch (Exception ex)
+                {
+                    if (ex.ToString().Contains("The system cannot find the file specified") == true)
+                    {
+                        // add titles
+                    }
                 }
             }
-            else
+            else if (CurrentProfile.Type == MCHelper.GameType.Other)
             {
-                //txt_Status.Text = "Status: Login faild plaese try again.";
+                //Process Other = new Process();
+                //TODO
+                //Other.StartInfo.FileName 
             }
-
-            LoginStatus.Close();
-
         }
 
         private void txt_Username_Click(object sender, EventArgs e)
