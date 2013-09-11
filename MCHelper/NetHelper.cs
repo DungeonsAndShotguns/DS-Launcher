@@ -96,7 +96,15 @@ namespace MinecraftHelper
             }
         }
 
-      public static CookieContainer login(string url, string username, string password)
+        /// <summary>
+        /// Function taken from https://www.phpbb.com/community/viewtopic.php?f=71&t=2132397
+        /// Used to verify login to a phpbb board
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+      public static CookieContainer LoginPHPBB(string url, string username, string password)
       {
          if (url.Length == 0 || username.Length == 0 || password.Length == 0)
          {
