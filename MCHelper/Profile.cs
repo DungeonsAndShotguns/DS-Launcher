@@ -7,18 +7,18 @@ namespace MCHelper
 {
     public enum GameType
 	{
-        Minecraft, Other
+        Minecraft, Information, Other
 	}
 
     public class Profile
     {
-        string GameName { get; set; }
-        string GameDir { get; set; }
-        string CurrentVersion { get; set; }
-        string UpdateURL { get; set; }
-        string DescriptionURL { get; set; }
-        GameType Type { get; set; }
-        string CommandLineArgs { get; set; }
+        public string GameName { get; set; }
+        public string GameDir { get; set; }
+        public string CurrentVersion { get; set; }
+        public string UpdateURL { get; set; }
+        public string DescriptionURL { get; set; }
+        public GameType Type { get; set; }
+        public string CommandLineArgs { get; set; }
 
         // Minecraft Settings
         int MaxMem { get; set; }
@@ -41,7 +41,7 @@ namespace MCHelper
 
                         while (ReadConfig.EndOfStream == false)
                         {
-                            TempString = ReadConfig.ReadLine();
+                            //TempString = ReadConfig.ReadLine();
 
                             if (TempString.StartsWith("#") == true)
                             {
@@ -86,12 +86,19 @@ namespace MCHelper
                                         break;
                                 }
                             }
+
+                            TempPair = new string[2];
                         }
                     }
                 }
             }
 
             return this;
+        }
+
+        public override string ToString()
+        {
+            return GameName;
         }
     }
 }

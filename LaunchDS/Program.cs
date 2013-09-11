@@ -34,6 +34,9 @@ namespace LaunchDS
             // Test
             //args = new string[1] { "bypass" };
 
+            //Load the profiles
+            LoadProfiles();
+
             // constuct datatable
             Releases.Columns.Add(new DataColumn("ReleaseNumber", typeof(string)));
             Releases.Columns.Add(new DataColumn("DownloadLocation", typeof(string)));
@@ -156,7 +159,7 @@ namespace LaunchDS
             
         }
 
-        public void LoadProfiles()
+        public static void LoadProfiles()
         {
             //MCHelper.Profile TempProfile = null;
 

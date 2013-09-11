@@ -217,6 +217,9 @@ namespace LaunchDS
 
         private void MainLite_Load(object sender, EventArgs e)
         {
+            // bind the profile box to the profil selector
+            CB_Config.Items.AddRange(Program.Profiles.ToArray());
+
             DSHelpper.FileStuctureCheck CheckFiles = new DSHelpper.FileStuctureCheck();
 
             if (Program.CurrentVersion != Program.CheckVersion())
@@ -265,6 +268,25 @@ namespace LaunchDS
         private void txt_Status_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void CB_Config_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            MCHelper.Profile CurrentProfile = (MCHelper.Profile)CB_Config.SelectedItem;
+
+            if (CurrentProfile.Type == MCHelper.GameType.Minecraft)
+            {
+                btn_Settings.Enabled = true;
+            }
+            else
+            {
+                btn_Settings.Enabled = false;
+            }
+
+            if (CurrentProfile.DescriptionURL != null)
+            {
+                webBrowser1.Navigate(CurrentProfile.DescriptionURL);
+            }
         }
     }
 }

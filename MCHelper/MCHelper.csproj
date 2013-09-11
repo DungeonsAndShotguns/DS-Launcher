@@ -46,6 +46,7 @@
     <Compile Include="Mod.cs" />
     <Compile Include="NetHelper.cs" />
     <Compile Include="Package.cs" />
+    <Compile Include="Profile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

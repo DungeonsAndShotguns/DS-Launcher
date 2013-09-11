@@ -80,6 +80,7 @@
             // 
             // btn_Settings
             // 
+            this.btn_Settings.Enabled = false;
             this.btn_Settings.Location = new System.Drawing.Point(496, 357);
             this.btn_Settings.Name = "btn_Settings";
             this.btn_Settings.Size = new System.Drawing.Size(75, 23);
@@ -104,6 +105,7 @@
             this.CB_Config.Name = "CB_Config";
             this.CB_Config.Size = new System.Drawing.Size(121, 21);
             this.CB_Config.TabIndex = 9;
+            this.CB_Config.SelectedIndexChanged += new System.EventHandler(this.CB_Config_SelectedIndexChanged);
             // 
             // MainLite
             // 
@@ -121,7 +123,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "MainLite";
-            this.Text = "DS Launcher Lite";
+            this.Text = "DS Launcher";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainLite_FormClosing);
             this.Load += new System.EventHandler(this.MainLite_Load);
             this.ResumeLayout(false);
