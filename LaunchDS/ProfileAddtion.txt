@@ -1,2 +1,0 @@
-with the advent of the new mc launcher stupidy we have to make some changes to the launcher. In comes instances, each child folder with in
-the data folder will be a diffrent MC setup with a diffrnet .minecraft folder.
