@@ -6,6 +6,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,11 +15,14 @@ import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
+import java.util.regex.Matcher;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -60,7 +64,6 @@ public class DSLauncherHead extends JFrame {
 	private static final int OUT_OF_DATE = -1;
 	
 	
-	
 	/***********************/
 	/* START CONFIGURATION */
 	/***********************/
@@ -79,6 +82,9 @@ public class DSLauncherHead extends JFrame {
 	
 	/** DS Launcher Properties Filename **/
 	private final String DEFAULT_FILE_NAME = "DSLauncher.properties";
+	
+	/** DS Launcher Blacklist Filename **/
+	private final String DEFAULT_BLACKLIST_NAME = "data" + File.separator + ".files.blacklist";
 	
 	/** Default Version Number (incase one doesn't exist) **/
 	private static final String DEFAULT_VERSION = "";
@@ -403,10 +409,46 @@ public class DSLauncherHead extends JFrame {
 	        	appendLine("ERROR: " + e.getLocalizedMessage());
 	        }
 	        
-	        //TODO: Find this Extraction Properties File I might be Missing!
-
-	        //TODO: Install Files
 	        //TODO: Delete .blacklist files
+	        BufferedReader in = null;
+	        try {
+	        	in = new BufferedReader(new FileReader(DEFAULT_BLACKLIST_NAME));
+		        String line = in.readLine();  
+		        while (line != null)  
+		        {  
+		        	//Works on windows installations
+		        	line = line.replaceAll("/", Matcher.quoteReplacement(File.separator));
+		        	//Doesn't work... but may be neccessary for Linux distro's
+		        	//line = line.replaceAll("\\", Matcher.quoteReplacement(File.separator));
+
+		        	appendLine("Removing " + line);
+		        	Files.deleteIfExists(Paths.get(line));
+		        	line = in.readLine();  
+		        } 
+				
+				if (in != null) {
+					in.close();
+				}
+	        } catch (IOException e) {
+	        	appendLine("Error baleeting files!\n" + e);
+	        } finally {
+	        	if (in != null) {
+	        		try {
+						in.close();
+					} catch (IOException e) {
+						appendLine("Error Closing " + DEFAULT_BLACKLIST_NAME + "\n" + e);
+					}
+	        	}
+	        }
+	        
+	        appendLine("Removing " + DEFAULT_BLACKLIST_NAME);
+	        
+	        try {
+				Files.deleteIfExists(Paths.get(DEFAULT_BLACKLIST_NAME));
+			} catch (IOException e) {
+				appendLine("Error baleeting " + DEFAULT_BLACKLIST_NAME + "!\n" + e);
+			}
+	        
 	        
 			versionFromFile = versions.get(i);
 		}

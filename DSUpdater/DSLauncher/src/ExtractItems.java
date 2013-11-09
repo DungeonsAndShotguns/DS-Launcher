@@ -73,7 +73,8 @@ public class ExtractItems {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Error occurs: " + e);
+            System.err.println("Error occurs: ");
+            e.printStackTrace();
             System.exit(1);
         } finally {
             if (inArchive != null) {
