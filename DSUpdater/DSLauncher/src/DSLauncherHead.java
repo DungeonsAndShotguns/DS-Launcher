@@ -11,16 +11,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.RandomAccessFile;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import javax.swing.BoxLayout;
@@ -32,13 +29,7 @@ import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 
-import org.omg.PortableInterceptor.SUCCESSFUL;
-
-import DSLauncher.src.ExtractExample.ExtractionException;
-
 import net.sf.sevenzipjbinding.*;
-import net.sf.sevenzipjbinding.impl.*;
-import net.sf.sevenzipjbinding.simple.*;
 
 public class DSLauncherHead extends JFrame {
 	/** Auto Generated ID **/
@@ -405,11 +396,10 @@ public class DSLauncherHead extends JFrame {
 	        
 	        appendLine("Installing: " + versions.get(i));
 	        
-	        String filter = null;
 	        appendLine("Extracting " + fileNames.get(i) + " to " + System.getProperty("user.dir"));
 	        try {
-	        	new ExtractExample(fileNames.get(i), System.getProperty("user.dir") + System.getProperty("file.separator") + "out", true, filter).extract();
-	        } catch (ExtractionException e) {
+	        	ExtractItems.unzip(fileNames.get(i));
+	        } catch (Exception e) {
 	        	appendLine("ERROR: " + e.getLocalizedMessage());
 	        }
 	        
