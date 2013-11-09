@@ -80,10 +80,8 @@ public class InArchiveImpl implements ISevenZipInArchive {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private long sevenZipArchiveInstance;
 
-	@SuppressWarnings("unused")
 	private long sevenZipArchiveInStreamInstance;
 
 	private int numberOfItems = -1;
@@ -203,6 +201,7 @@ public class InArchiveImpl implements ISevenZipInArchive {
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("incomplete-switch")
 	public Object getProperty(int index, PropID propID) throws SevenZipException {
 		if (index < 0 || index >= getNumberOfItems()) {
 			throw new SevenZipException("Index out of range. Index: " + index + ", NumberOfItems: "
@@ -273,7 +272,6 @@ public class InArchiveImpl implements ISevenZipInArchive {
 	 * @param archiveFormat
 	 *            format of the opened archive
 	 */
-	@SuppressWarnings("unused")
 	private void setArchiveFormat(String archiveFormatString) {
 		for (ArchiveFormat archiveFormat : ArchiveFormat.values()) {
 			if (archiveFormat.getMethodName().equalsIgnoreCase(archiveFormatString)) {

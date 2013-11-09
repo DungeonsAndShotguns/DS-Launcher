@@ -136,9 +136,8 @@ public class DSLauncherHead extends JFrame {
 		postInit();
 		
 		int versionStatus = compareVersion(versionFromFile, greatestVersionFromServer);
+		
 		if (versionStatus == GREATER) {
-			//The file has a "more up to date version number than the Server"
-			//No idea what to do here...
 			setVisible(true);
 			
 			appendLine("Unexpected Version Mismatch");
@@ -341,7 +340,7 @@ public class DSLauncherHead extends JFrame {
 						success = false;
 						greatestVersionFromServer = versionFromFile;
 						return;
-		    		} else if (compareVersion(updateParts[0], versionFromFile) == GREATER) {
+		    		} else if (compareVersion(updateParts[0], greatestVersionFromServer) == GREATER) {
 		    			appendLine("Found Update: " + updateParts[0]);
 		    			greatestVersionFromServer = updateParts[0];
 		    			versions.add(updateParts[0]);
@@ -358,7 +357,6 @@ public class DSLauncherHead extends JFrame {
 		    		greatestVersionFromServer = versionFromFile;
 					return;
 		    	}
-		    	greatestVersionFromServer = versionFromFile;
 	    	}
 		} catch(Exception e) {
 			appendLine("Couldn't recieve response from server, ignoring updates");
@@ -376,6 +374,8 @@ public class DSLauncherHead extends JFrame {
 				}
 			}
 		}
+		
+		//greatestVersionFromServer = versions.get(numOfUpdates);
 	}
 	
 	/**
@@ -464,7 +464,7 @@ public class DSLauncherHead extends JFrame {
 					in.close();
 				}
 	        } catch (IOException e) {
-	        	appendLine("Error baleeting files!");
+	        	appendLine("Warning: " + DEFAULT_BLACKLIST_NAME + " doesn't exist, or couldn't be opened properly.");
 	        	appendLine(e.getMessage());
 	        } finally {
 	        	if (in != null) {
@@ -478,17 +478,24 @@ public class DSLauncherHead extends JFrame {
 	        }
 	        
 	        appendLine("Removing " + DEFAULT_BLACKLIST_NAME);
-	        
 	        try {
 				Files.deleteIfExists(Paths.get(DEFAULT_BLACKLIST_NAME));
 			} catch (IOException e) {
-				appendLine("Error baleeting " + DEFAULT_BLACKLIST_NAME);
+				appendLine("Warning: " + DEFAULT_BLACKLIST_NAME + " isn't behaving properly.");
+				appendLine(e.getMessage());
+			}
+	        
+	        appendLine("Removing " + fileNames.get(i));
+	        try {
+				Files.deleteIfExists(Paths.get(fileNames.get(i)));
+			} catch (IOException e) {
+				appendLine("Warning: " + fileNames.get(i) + " isn't behaving properly.");
 				appendLine(e.getMessage());
 			}
 	        
 			versionFromFile = versions.get(i);
 		}
-		appendLine("Updated to version:\n " + versionFromFile);
+		appendLine("Updated to version: " + versionFromFile);
 	}
 	
 	void downloadFromURL(URL url, String localFilename) throws IOException {
