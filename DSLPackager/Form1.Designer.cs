@@ -32,7 +32,7 @@
             this.tbx_VersionNumber = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.tbx_UpdateURL = new System.Windows.Forms.TextBox();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.rtb_BlackList = new System.Windows.Forms.RichTextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.tbx_RootDir = new System.Windows.Forms.TextBox();
@@ -76,13 +76,13 @@
             this.tbx_UpdateURL.Size = new System.Drawing.Size(286, 20);
             this.tbx_UpdateURL.TabIndex = 3;
             // 
-            // richTextBox1
+            // rtb_BlackList
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(12, 134);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(375, 115);
-            this.richTextBox1.TabIndex = 4;
-            this.richTextBox1.Text = "";
+            this.rtb_BlackList.Location = new System.Drawing.Point(12, 134);
+            this.rtb_BlackList.Name = "rtb_BlackList";
+            this.rtb_BlackList.Size = new System.Drawing.Size(375, 115);
+            this.rtb_BlackList.TabIndex = 4;
+            this.rtb_BlackList.Text = "";
             // 
             // label3
             // 
@@ -153,6 +153,7 @@
             this.btn_Compile.TabIndex = 12;
             this.btn_Compile.Text = "Compile";
             this.btn_Compile.UseVisualStyleBackColor = true;
+            this.btn_Compile.Click += new System.EventHandler(this.btn_Compile_Click);
             // 
             // btn_Clear
             // 
@@ -177,7 +178,7 @@
             this.Controls.Add(this.tbx_RootDir);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
-            this.Controls.Add(this.richTextBox1);
+            this.Controls.Add(this.rtb_BlackList);
             this.Controls.Add(this.tbx_UpdateURL);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.tbx_VersionNumber);
@@ -197,7 +198,7 @@
         private System.Windows.Forms.TextBox tbx_VersionNumber;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox tbx_UpdateURL;
-        private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.RichTextBox rtb_BlackList;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox tbx_RootDir;

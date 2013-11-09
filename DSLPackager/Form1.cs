@@ -33,5 +33,23 @@ namespace DSLPackager
                 tbx_UpdateList.Text = findFile.FileName;
             }
         }
+
+        private void btn_Compile_Click(object sender, EventArgs e)
+        {
+            List<string> blackListItems = new List<string>(rtb_BlackList.Lines);
+
+            string fileName = string.Empty;
+            if(tbx_VersionNumber.Text.Contains('.') == true)
+            {
+                fileName = "DS" + tbx_VersionNumber.Text.Replace(".", "") + ".7zip";
+            }
+            else
+            {
+                fileName = "DS" + tbx_VersionNumber.Text + ".7zip";
+            }
+
+            Package packageCreation = new Package(tbx_VersionNumber.Text, tbx_RootDir.Text, tbx_UpdateList.Text, blackListItems, ".files.blacklist", tbx_UpdateURL.Text, fileName);
+            packageCreation.Create();
+        }
     }
 }

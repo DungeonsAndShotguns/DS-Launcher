@@ -57,17 +57,26 @@ namespace DSLPackager
         {
             VersionNumber = versionNumber;
             // double check this location
-            RootPath = RootPath;
+            RootPath = rootPath;
             UpdateListLocation = updateListLocation;
             FileBlackList = fileBlackList;
             BlackListFileName = blackListFileName;
+            UpdateURL = updateURL;
+            FileToDownload = fileToDownload;
         }
 
         public void Create()
         {
+            System.Console.WriteLine("Creating Version File");
             CreateVersionFile();
+
+            System.Console.WriteLine("Creating Black List File");
             CreateBlackList();
+
+            System.Console.WriteLine("Compressing the Update");
             CompressUpdate();
+
+            System.Console.WriteLine("Creating Version List File");
             ConstuctVersionList();
         }
 
