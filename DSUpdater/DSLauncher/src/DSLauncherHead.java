@@ -140,7 +140,6 @@ public class DSLauncherHead extends JFrame {
 			closeGUI();
 		}
 		else if (versionStatus == OUT_OF_DATE) {
-			appendLine("You're version is out of date!");
 			//Turn the GUI on!
 			setVisible(true);
 			updateDSMinecraftInstallation();
@@ -299,6 +298,7 @@ public class DSLauncherHead extends JFrame {
 	private void getVersionsFromServer() {
 		appendLine("Obtaining version from server.");
 		numOfUpdates = 0;
+		greatestVersionFromServer = DEFAULT_VERSION;
 		
 		BufferedReader in = null;
 		try {
@@ -311,22 +311,21 @@ public class DSLauncherHead extends JFrame {
 		    	//Splits the string into parts based on semi-colons, and creates empty strings if there exists ;;
 		    	String[] updateParts = line.replace(" ", "").split(";", -1);
 		    	if(updateParts.length == 3) {
-		    		if (compareVersion(updateParts[0], versionFromFile) == GREATER) {
-		    			appendLine("Found Version: " + updateParts[0]);
-		    			
-		    			versions.add(updateParts[0]);
-				    	downloadUrls.add(updateParts[1]);
-				    	fileNames.add(updateParts[2]);
-				    	
-				    	numOfUpdates++;
-				    	System.out.println(numOfUpdates);
-		    		} else {
+		    		if (compareVersion(updateParts[0], greatestVersionFromServer) == OUT_OF_DATE){
 		    			appendLine("Update.txt doesn't look right.");
 		    			appendLine("Updates out of order.  Contact your Neighboorhood Server Admin\n");
 						appendLine("Ignoring all updates and ignoring check.");
 						greatestVersionFromServer = versionFromFile;
 						return;
-		    		}
+		    		} else if (compareVersion(updateParts[0], versionFromFile) == GREATER) {
+		    			appendLine("Found Update: " + updateParts[0]);
+		    			greatestVersionFromServer = updateParts[0];
+		    			versions.add(updateParts[0]);
+				    	downloadUrls.add(updateParts[1]);
+				    	fileNames.add(updateParts[2]);
+				    	
+				    	numOfUpdates++;
+		    		} 
 		    	} else {
 		    		appendLine("Update.txt doesn't look right.");
 		    		appendLine("Expected: Version; DownloadURL; FileName\n");
@@ -335,14 +334,10 @@ public class DSLauncherHead extends JFrame {
 					return;
 		    	}
 	    	}
-	    	
-	    	//Assume the latest Version is the Last Version
-	    	if (numOfUpdates != 0)
-	    		greatestVersionFromServer = versions.get(numOfUpdates-1);
-		    
 		} catch(Exception e) {
 			appendLine("Couldn't recieve response from server, ignoring updates");
 			greatestVersionFromServer = versionFromFile;
+			e.printStackTrace();
 		} finally {
 			if (in != null) {
 				try {
@@ -404,8 +399,7 @@ public class DSLauncherHead extends JFrame {
 	//        Scanner s = null;
 	//        URL d = null;
 	        
-	        appendLine("Downloading Update: " + versions.get(i));
-	        appendLine(downloadUrls.get(i));
+	        appendLine("Downloading Update: " + versions.get(i) + " Please Wait...");
 	        
 	        try{
 		        downloadFromURL(new URL(downloadUrls.get(i)), fileNames.get(i));
@@ -423,12 +417,13 @@ public class DSLauncherHead extends JFrame {
 	        } finally {
 	        	//Close Files
 	        }
-			
-			
-			
-			versionFromFile = greatestVersionFromServer;
-			appendLine("Updated to version: " + versionFromFile);
+	        
+	        appendLine("Installing: " + versions.get(i));
+	        //TODO: Install Files
+	        
+			versionFromFile = versions.get(i);
 		}
+		appendLine("Updated to version: " + versionFromFile);
 	}
 	
 	/**
@@ -462,7 +457,7 @@ public class DSLauncherHead extends JFrame {
 	        while ((len = i.read(buffer)) > 0) {  
 	            f.write(buffer, 0, len);
 	            downloaded += len;
-	            System.out.println(downloaded + "/" + fileSize + " kB");
+	            //System.out.println(downloaded + "/" + fileSize + " kB");
 	        }
 	    } finally {
 	        try {
