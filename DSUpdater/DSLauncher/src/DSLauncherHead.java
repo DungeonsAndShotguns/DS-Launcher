@@ -74,10 +74,10 @@ public class DSLauncherHead extends JFrame {
 	private final String UPDATE_URL_STRING = "https://dl.dropboxusercontent.com/s/n4jfufpyh5emqg1/fakeUpdate.txt"; //"https://dl.dropboxusercontent.com/u/5921811/update.txt"
 	
 	/** File Date Format **/
-	private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
+	private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
 	
 	/** System Application Name **/
-	private String name = "DSUpdater";
+	private final String name = "DSUpdater";
 	
 	/** DS Update Log Filename (The Date will be Appended onto the end of this **/
 	private final String UPDATE_FILENAME = "DS Update Log ";
@@ -100,11 +100,17 @@ public class DSLauncherHead extends JFrame {
 	/** Pixel Height of Window **/
 	private final int DEFAULT_HEIGHT = 300;
 	
+	/** File Download buffer **/
+	private final int BUFFER_SIZE = 4096; //4kb buffer
+	
 	/** Whether or not the user can Resize the console window **/
 	private final boolean isConsoleResizable = false;
 	
-	/** File Download buffer **/
-	private final int BUFFER_SIZE = 4096; //4kb buffer
+	/** Choose to display "popup" update messages **/
+	private final boolean displayUpdateMessages = false;
+	
+	/** Choose to display "popup error messages **/
+	private final boolean displayErrorMessages = true;
 	
 	/*********************/
 	/* END CONFIGURATION */
@@ -139,8 +145,9 @@ public class DSLauncherHead extends JFrame {
 			appendLine("Server Version: " + greatestVersionFromServer);
 			appendLine("Local Version: " + versionFromFile);
 			
-			saveConsoleLog(UPDATE_FILENAME + dateFormat.format(new Date()) + ".txt");
-			JOptionPane.showMessageDialog(null, "You appear to be a couple versions ahead of us.\nDid you modify " + DEFAULT_FILE_NAME + "?", "Version Mismatch", JOptionPane.WARNING_MESSAGE);
+			saveConsoleLog(ERROR_FILENAME + dateFormat.format(new Date()) + ".txt");
+			if (displayErrorMessages)
+				JOptionPane.showMessageDialog(null, "You appear to be a couple versions ahead of us.\nDid you modify " + DEFAULT_FILE_NAME + "?", "Version Mismatch", JOptionPane.WARNING_MESSAGE);
 			closeGUI();
 		}
 		else if (versionStatus == OUT_OF_DATE) {
@@ -149,11 +156,16 @@ public class DSLauncherHead extends JFrame {
 			updateDSMinecraftInstallation();
 			saveToTextFile(DEFAULT_FILE_NAME);
 			
-			saveConsoleLog(UPDATE_FILENAME + dateFormat.format(new Date()) + ".txt");
-			if (success)
-				JOptionPane.showMessageDialog(null, "Your version was updated to " + greatestVersionFromServer, "Updated", JOptionPane.PLAIN_MESSAGE);
-			else 
-				JOptionPane.showMessageDialog(null, name + " Encountered a Failure: " + greatestVersionFromServer, "Warning", JOptionPane.WARNING_MESSAGE);
+			
+			if (success) {
+				saveConsoleLog(UPDATE_FILENAME + dateFormat.format(new Date()) + ".txt");
+				if (displayUpdateMessages)
+					JOptionPane.showMessageDialog(null, "Your version was updated to " + greatestVersionFromServer, "Updated", JOptionPane.PLAIN_MESSAGE);
+			} else { 
+				saveConsoleLog(ERROR_FILENAME + dateFormat.format(new Date()) + ".txt");
+				if (displayErrorMessages)
+					JOptionPane.showMessageDialog(null, name + " Encountered a Failure: " + greatestVersionFromServer, "Warning", JOptionPane.WARNING_MESSAGE);
+			}
 			
 		}
 		else if (versionStatus == EQUAL) {
@@ -248,7 +260,8 @@ public class DSLauncherHead extends JFrame {
 			appendLine(DEFAULT_FILE_NAME + " missing, a new one was created.");
 			
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, "File read error", "Error", JOptionPane.ERROR_MESSAGE);
+			if (displayErrorMessages)
+				JOptionPane.showMessageDialog(null, "File read error", "Error", JOptionPane.ERROR_MESSAGE);
 			appendLine(e.getMessage());
 			success = false;
 			//If we can't read the file, we'll just exit
@@ -267,7 +280,8 @@ public class DSLauncherHead extends JFrame {
 			out.println(greatestVersionFromServer);	
 			
 		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null, "File write error", "Error", JOptionPane.ERROR_MESSAGE);
+			if (displayErrorMessages)
+				JOptionPane.showMessageDialog(null, "File write error", "Error", JOptionPane.ERROR_MESSAGE);
 			appendLine(e.getMessage());
 			success = false;
 		}
