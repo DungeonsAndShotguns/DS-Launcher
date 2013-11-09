@@ -155,10 +155,6 @@ public class DSLauncherHead extends JFrame {
 			appendLine("You are up to date!");
 		}
 		
-		//TODO: Launch Minecraft
-		
-
-
 		closeGUI();
 	}
 
@@ -309,13 +305,13 @@ public class DSLauncherHead extends JFrame {
 			in = new BufferedReader(new InputStreamReader(updateUrl.openStream()));
 			appendLine("Recieved server version reply.");
 			
-		    try {
-		    	String line;
-		    	while ((line = in.readLine()) != null) {
-			    	//Splits the string into parts based on semi colons, and creates empty strings if there exists ;;
-			    	String[] updateParts = line.replace(" ", "").split(";", -1);
-			    	
-		    		if ((updateParts.length == 3) && compareVersion(updateParts[0], versionFromFile) == GREATER) {
+		   
+	    	String line;
+	    	while ((line = in.readLine()) != null) {
+		    	//Splits the string into parts based on semi-colons, and creates empty strings if there exists ;;
+		    	String[] updateParts = line.replace(" ", "").split(";", -1);
+		    	if(updateParts.length == 3) {
+		    		if (compareVersion(updateParts[0], versionFromFile) == GREATER) {
 		    			appendLine("Found Version: " + updateParts[0]);
 		    			
 		    			versions.add(updateParts[0]);
@@ -324,17 +320,26 @@ public class DSLauncherHead extends JFrame {
 				    	
 				    	numOfUpdates++;
 				    	System.out.println(numOfUpdates);
+		    		} else {
+		    			appendLine("Update.txt doesn't look right.");
+		    			appendLine("Updates out of order.  Contact your Neighboorhood Server Admin\n");
+						appendLine("Ignoring all updates and ignoring check.");
+						greatestVersionFromServer = versionFromFile;
+						return;
 		    		}
+		    	} else {
+		    		appendLine("Update.txt doesn't look right.");
+		    		appendLine("Expected: Version; DownloadURL; FileName\n");
+		    		appendLine("Ignoring all updates and ignoring check.");
+		    		greatestVersionFromServer = versionFromFile;
+					return;
 		    	}
-		    	//Assume the latest Version is the Last Version
-		    	if (numOfUpdates != 0)
-		    		greatestVersionFromServer = versions.get(numOfUpdates-1);
-		    } catch(IndexOutOfBoundsException e) {
-		    	e.printStackTrace();
-				appendLine("Update.txt doesn't look right.");
-				appendLine("Expected: Version; DownloadURL; FileName\n");
-				appendLine("Ignoring all updates and ignoring check.");
-		    }
+	    	}
+	    	
+	    	//Assume the latest Version is the Last Version
+	    	if (numOfUpdates != 0)
+	    		greatestVersionFromServer = versions.get(numOfUpdates-1);
+		    
 		} catch(Exception e) {
 			appendLine("Couldn't recieve response from server, ignoring updates");
 			greatestVersionFromServer = versionFromFile;
