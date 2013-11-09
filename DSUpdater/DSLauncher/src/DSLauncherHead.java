@@ -58,6 +58,8 @@ public class DSLauncherHead extends JFrame {
 	private ArrayList<String> downloadUrls; 
 	private ArrayList<String> fileNames;
 	
+	boolean success = true;
+	
 	/* Comparison Definitions */
 	private static final int GREATER = 1;
 	private static final int EQUAL = 0;
@@ -73,6 +75,9 @@ public class DSLauncherHead extends JFrame {
 	
 	/** File Date Format **/
 	private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
+	
+	/** System Application Name **/
+	private String name = "DSUpdater";
 	
 	/** DS Update Log Filename (The Date will be Appended onto the end of this **/
 	private final String UPDATE_FILENAME = "DS Update Log ";
@@ -141,17 +146,17 @@ public class DSLauncherHead extends JFrame {
 		else if (versionStatus == OUT_OF_DATE) {
 			//Turn the GUI on!
 			setVisible(true);
-			boolean success = updateDSMinecraftInstallation();
-			//saveToTextFile(DEFAULT_FILE_NAME);
+			updateDSMinecraftInstallation();
+			saveToTextFile(DEFAULT_FILE_NAME);
 			
 			saveConsoleLog(UPDATE_FILENAME + dateFormat.format(new Date()) + ".txt");
 			if (success)
 				JOptionPane.showMessageDialog(null, "Your version was updated to " + greatestVersionFromServer, "Updated", JOptionPane.PLAIN_MESSAGE);
 			else 
-				JOptionPane.showMessageDialog(null, "Update Failure: " + greatestVersionFromServer, "Warning", JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(null, name + " Encountered a Failure: " + greatestVersionFromServer, "Warning", JOptionPane.WARNING_MESSAGE);
 			
 		}
-		else if (versionStatus == EQUAL) {	
+		else if (versionStatus == EQUAL) {
 			appendLine("You are up to date!");
 		}
 		
@@ -162,18 +167,12 @@ public class DSLauncherHead extends JFrame {
 	 * Pre-Inititialization routine, used for variable initialization
 	 */
 	private void preInit() {
-		try {
-			SevenZip.initSevenZipFromPlatformJAR();
-		} catch (SevenZipNativeInitializationException e) {
-			appendLine("Error initializing 7Zip" + e);
-		}
-		
 		statusString = "";
 		versions = new ArrayList<String>();
 		downloadUrls = new ArrayList<String>();
 		fileNames = new ArrayList<String>();
 		
-		titleLabel = new JLabel("DSLauncher");
+		titleLabel = new JLabel(name);
 		titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		statusLabel = new JLabel(statusString);
 		scrollPane = new JScrollPane();
@@ -204,7 +203,10 @@ public class DSLauncherHead extends JFrame {
 			//Uhhhh... it broke?  No really, if this breaks, I think You need to reinstall Java...
 			//Check the spelling on the updateUrl... it might be wrong?
 			appendLine("Error: URL could not be made");
+			appendLine(e.getMessage());
 			saveConsoleLog(ERROR_FILENAME + dateFormat.format(new Date()) + ".txt");
+			success = false;
+			
 		}
 	}
 	
@@ -217,9 +219,16 @@ public class DSLauncherHead extends JFrame {
 	}
 	
 	/**
-	 * Nothing at the moment
+	 * Initializes the 7zip archive
 	 */
 	private void postInit() {
+		try {
+			SevenZip.initSevenZipFromPlatformJAR();
+		} catch (SevenZipNativeInitializationException e) {
+			appendLine("Error initializing 7Zip");
+			appendLine(e.getMessage());
+			success = false;
+		}
 	}
 	
 	private void closeGUI() {
@@ -239,8 +248,10 @@ public class DSLauncherHead extends JFrame {
 			appendLine(DEFAULT_FILE_NAME + " missing, a new one was created.");
 			
 		} catch (Exception e) {
-			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "File read error", "Error", JOptionPane.ERROR_MESSAGE);
+			appendLine(e.getMessage());
+			success = false;
+			//If we can't read the file, we'll just exit
 			closeGUI();
 		}
 		
@@ -255,9 +266,10 @@ public class DSLauncherHead extends JFrame {
 			out = new PrintWriter(new BufferedWriter(new FileWriter(filename)));
 			out.println(greatestVersionFromServer);	
 			
-		} catch (IOException ex) {
-			ex.printStackTrace();
+		} catch (IOException e) {
 			JOptionPane.showMessageDialog(null, "File write error", "Error", JOptionPane.ERROR_MESSAGE);
+			appendLine(e.getMessage());
+			success = false;
 		}
 		
 		if (out != null) {
@@ -277,6 +289,7 @@ public class DSLauncherHead extends JFrame {
 		} catch (IOException ex) {
 			ex.printStackTrace();
 			JOptionPane.showMessageDialog(null, "File write error", "Error", JOptionPane.ERROR_MESSAGE);
+			success = false;
 		}
 		
 	}
@@ -311,6 +324,7 @@ public class DSLauncherHead extends JFrame {
 		    			appendLine("Update.txt doesn't look right.");
 		    			appendLine("Updates out of order.  Contact your Neighboorhood Server Admin\n");
 						appendLine("Ignoring all updates and ignoring check.");
+						success = false;
 						greatestVersionFromServer = versionFromFile;
 						return;
 		    		} else if (compareVersion(updateParts[0], versionFromFile) == GREATER) {
@@ -326,21 +340,25 @@ public class DSLauncherHead extends JFrame {
 		    		appendLine("Update.txt doesn't look right.");
 		    		appendLine("Expected: Version; DownloadURL; FileName\n");
 		    		appendLine("Ignoring all updates and ignoring check.");
+		    		success = false;
 		    		greatestVersionFromServer = versionFromFile;
 					return;
 		    	}
+		    	greatestVersionFromServer = versionFromFile;
 	    	}
 		} catch(Exception e) {
 			appendLine("Couldn't recieve response from server, ignoring updates");
+			appendLine(e.getMessage());
+			success = false;
 			greatestVersionFromServer = versionFromFile;
-			e.printStackTrace();
 		} finally {
 			if (in != null) {
 				try {
 					in.close();
 				} catch (IOException e) {
-					appendLine("We can't seem to close the download properly... ");
+					appendLine("We can't seem to close the download properly");
 					appendLine(e.getMessage());
+					success = false;
 				}
 			}
 		}
@@ -386,7 +404,7 @@ public class DSLauncherHead extends JFrame {
 		}
 	}
 	
-	private boolean updateDSMinecraftInstallation() {
+	private void updateDSMinecraftInstallation() {
 		appendLine("Updating from version: " + versionFromFile);
 		for (int i=0; i<numOfUpdates; i++) {
 			
@@ -395,9 +413,9 @@ public class DSLauncherHead extends JFrame {
 	        	appendLine("Downloading Update: Please Wait...");
 		        downloadFromURL(new URL(downloadUrls.get(i)), fileNames.get(i));
 	        } catch(IOException e) {
-	        	appendLine("File downloading Error!\n");
+	        	appendLine("File downloading Error!");
 	        	appendLine(e.getMessage());
-	        	return false;
+	        	success = false;
 	        }
 	        
 	        appendLine("Installing: " + versions.get(i));
@@ -406,10 +424,12 @@ public class DSLauncherHead extends JFrame {
 	        try {
 	        	ExtractItems.unzip(fileNames.get(i));
 	        } catch (Exception e) {
-	        	appendLine("ERROR: " + e.getLocalizedMessage());
+	        	appendLine("Encountered an Error while Unzipping Files");
+	        	appendLine(e.getMessage());
 	        }
+
+	        appendLine("Opening: " + DEFAULT_BLACKLIST_NAME);
 	        
-	        //TODO: Delete .blacklist files
 	        BufferedReader in = null;
 	        try {
 	        	in = new BufferedReader(new FileReader(DEFAULT_BLACKLIST_NAME));
@@ -430,13 +450,15 @@ public class DSLauncherHead extends JFrame {
 					in.close();
 				}
 	        } catch (IOException e) {
-	        	appendLine("Error baleeting files!\n" + e);
+	        	appendLine("Error baleeting files!");
+	        	appendLine(e.getMessage());
 	        } finally {
 	        	if (in != null) {
 	        		try {
 						in.close();
 					} catch (IOException e) {
-						appendLine("Error Closing " + DEFAULT_BLACKLIST_NAME + "\n" + e);
+						appendLine("Error Closing " + DEFAULT_BLACKLIST_NAME);
+						appendLine(e.getMessage());
 					}
 	        	}
 	        }
@@ -446,25 +468,13 @@ public class DSLauncherHead extends JFrame {
 	        try {
 				Files.deleteIfExists(Paths.get(DEFAULT_BLACKLIST_NAME));
 			} catch (IOException e) {
-				appendLine("Error baleeting " + DEFAULT_BLACKLIST_NAME + "!\n" + e);
+				appendLine("Error baleeting " + DEFAULT_BLACKLIST_NAME);
+				appendLine(e.getMessage());
 			}
-	        
 	        
 			versionFromFile = versions.get(i);
 		}
-		appendLine("Updated to version: " + versionFromFile);
-		return true;
-	}
-	
-	/**
-	 * Appends the given string to the statusLabel JLabel
-	 * @param str String to append
-	 */
-	private void appendLine(String str) {
-		System.out.println(str);
-		str.replace("\n", "<br>");
-		statusString += str + "<br>";
-		statusLabel.setText("<html>" + statusString + "</html>");
+		appendLine("Updated to version:\n " + versionFromFile);
 	}
 	
 	void downloadFromURL(URL url, String localFilename) throws IOException {
@@ -497,5 +507,16 @@ public class DSLauncherHead extends JFrame {
                 i.close();
             }
 	    }
+	}
+	
+	/**
+	 * Appends the given string to the statusLabel JLabel
+	 * @param str String to append
+	 */
+	private void appendLine(String str) {
+		System.out.println(str);
+		str.replace("\\n", "<br>");
+		statusString += str + "<br>";
+		statusLabel.setText("<html>" + statusString + "</html>");
 	}
 }
