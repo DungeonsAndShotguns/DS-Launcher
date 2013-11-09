@@ -18,6 +18,7 @@ import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -31,12 +32,13 @@ import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 
-import net.sf.sevenzipjbinding.ISevenZipInArchive;
-import net.sf.sevenzipjbinding.SevenZip;
-import net.sf.sevenzipjbinding.SevenZipException;
-import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
-import net.sf.sevenzipjbinding.simple.ISimpleInArchive;
-import net.sf.sevenzipjbinding.simple.ISimpleInArchiveItem;
+import org.omg.PortableInterceptor.SUCCESSFUL;
+
+import DSLauncher.src.ExtractExample.ExtractionException;
+
+import net.sf.sevenzipjbinding.*;
+import net.sf.sevenzipjbinding.impl.*;
+import net.sf.sevenzipjbinding.simple.*;
 
 public class DSLauncherHead extends JFrame {
 	/** Auto Generated ID **/
@@ -142,12 +144,14 @@ public class DSLauncherHead extends JFrame {
 		else if (versionStatus == OUT_OF_DATE) {
 			//Turn the GUI on!
 			setVisible(true);
-			updateDSMinecraftInstallation();
+			boolean success = updateDSMinecraftInstallation();
 			//saveToTextFile(DEFAULT_FILE_NAME);
 			
 			saveConsoleLog(UPDATE_FILENAME + dateFormat.format(new Date()) + ".txt");
-			
-			JOptionPane.showMessageDialog(null, "Your version was updated to " + greatestVersionFromServer, "Updated", JOptionPane.PLAIN_MESSAGE);
+			if (success)
+				JOptionPane.showMessageDialog(null, "Your version was updated to " + greatestVersionFromServer, "Updated", JOptionPane.PLAIN_MESSAGE);
+			else 
+				JOptionPane.showMessageDialog(null, "Update Failure: " + greatestVersionFromServer, "Warning", JOptionPane.WARNING_MESSAGE);
 			
 		}
 		else if (versionStatus == EQUAL) {	
@@ -161,6 +165,12 @@ public class DSLauncherHead extends JFrame {
 	 * Pre-Inititialization routine, used for variable initialization
 	 */
 	private void preInit() {
+		try {
+			SevenZip.initSevenZipFromPlatformJAR();
+		} catch (SevenZipNativeInitializationException e) {
+			appendLine("Error initializing 7Zip" + e);
+		}
+		
 		statusString = "";
 		versions = new ArrayList<String>();
 		downloadUrls = new ArrayList<String>();
@@ -194,7 +204,8 @@ public class DSLauncherHead extends JFrame {
 		try {
 			updateUrl = new URL(UPDATE_URL_STRING);
 		} catch (MalformedURLException e) {
-			//Uhhhh... it broke?
+			//Uhhhh... it broke?  No really, if this breaks, I think You need to reinstall Java...
+			//Check the spelling on the updateUrl... it might be wrong?
 			appendLine("Error: URL could not be made");
 			saveConsoleLog(ERROR_FILENAME + dateFormat.format(new Date()) + ".txt");
 		}
@@ -223,20 +234,13 @@ public class DSLauncherHead extends JFrame {
 		Scanner s = null;
 		try {
 			s = new Scanner(new File(filename));
-			
 			versionFromFile = s.nextLine().trim();
-			//TODO: Read more data than just the version number?
-
-			
 			
 		} catch (FileNotFoundException e) {
-			//No file exists, program will make a new File, and set default values
-			//TODO: Make necessary instance variables, and set them properly here
-				//(Default private final variables would be expected)
 			versionFromFile = DEFAULT_VERSION;
-			
 			saveToTextFile(filename);
 			appendLine(DEFAULT_FILE_NAME + " missing, a new one was created.");
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "File read error", "Error", JOptionPane.ERROR_MESSAGE);
@@ -252,12 +256,7 @@ public class DSLauncherHead extends JFrame {
 		PrintWriter out = null;
 		try{
 			out = new PrintWriter(new BufferedWriter(new FileWriter(filename)));
-			
-			out.println(greatestVersionFromServer);
-			//TODO: Store more than just the version file?
-			
-			
-			
+			out.println(greatestVersionFromServer);	
 			
 		} catch (IOException ex) {
 			ex.printStackTrace();
@@ -343,8 +342,8 @@ public class DSLauncherHead extends JFrame {
 				try {
 					in.close();
 				} catch (IOException e) {
-					e.printStackTrace();
 					appendLine("We can't seem to close the download properly... ");
+					appendLine(e.getMessage());
 				}
 			}
 		}
@@ -390,40 +389,39 @@ public class DSLauncherHead extends JFrame {
 		}
 	}
 	
-	private void updateDSMinecraftInstallation() {
+	private boolean updateDSMinecraftInstallation() {
+		appendLine("Updating from version: " + versionFromFile);
 		for (int i=0; i<numOfUpdates; i++) {
-			appendLine("Updating from version: " + versionFromFile);
-			//TODO: update the DSMinecraft Installation... I have no idea what this may entail
-	//		ISevenZipInArchive inArchive = null;
-	//		RandomAccessFile r = null;
-	//        Scanner s = null;
-	//        URL d = null;
-	        
-	        appendLine("Downloading Update: " + versions.get(i) + " Please Wait...");
-	        
+			
+	        appendLine("Starting Download: " + fileNames.get(i));
 	        try{
+	        	appendLine("Downloading Update: Please Wait...");
 		        downloadFromURL(new URL(downloadUrls.get(i)), fileNames.get(i));
-		        
-		        
-	//	        inArchive = SevenZip.openInArchive(null, // autodetect archive type
-	//	                new RandomAccessFileInStream(r));
-	//        
-	//        	//Getting simple interface of the archive inArchive
-	//        	ISimpleInArchive simpleInArchive = inArchive.getSimpleInterface();
-	        
-	        } catch(Exception e) {
-	        	System.out.println("IT ALL BLOWED UP!");
-	        	e.printStackTrace();
-	        } finally {
-	        	//Close Files
+	        } catch(IOException e) {
+	        	appendLine("File downloading Error!\n");
+	        	appendLine(e.getMessage());
+	        	return false;
 	        }
 	        
 	        appendLine("Installing: " + versions.get(i));
+	        
+	        String filter = null;
+	        appendLine("Extracting " + fileNames.get(i) + " to " + System.getProperty("user.dir"));
+	        try {
+	        	new ExtractExample(fileNames.get(i), System.getProperty("user.dir") + System.getProperty("file.separator") + "out", true, filter).extract();
+	        } catch (ExtractionException e) {
+	        	appendLine("ERROR: " + e.getLocalizedMessage());
+	        }
+	        
+	        //TODO: Find this Extraction Properties File I might be Missing!
+
 	        //TODO: Install Files
+	        //TODO: Delete .blacklist files
 	        
 			versionFromFile = versions.get(i);
 		}
 		appendLine("Updated to version: " + versionFromFile);
+		return true;
 	}
 	
 	/**
@@ -443,12 +441,12 @@ public class DSLauncherHead extends JFrame {
 	
 	    try {
 	        URLConnection urlConn = url.openConnection();//connect
-	
+	        
 	        i = urlConn.getInputStream();               //get connection inputstream
-	        f = new FileOutputStream(localFilename);   //open outputstream to local file
+	        f = new FileOutputStream(localFilename);    //open outputstream to local file
 	
-	        int downloaded = 0;
-	        int fileSize = i.available();
+	        //int downloaded = 0;
+	        //int fileSize = i.available();
 	        
 	        byte[] buffer = new byte[BUFFER_SIZE];
 	        int len;
@@ -456,19 +454,16 @@ public class DSLauncherHead extends JFrame {
 	        //while we have availble data, continue downloading and storing to local file
 	        while ((len = i.read(buffer)) > 0) {  
 	            f.write(buffer, 0, len);
-	            downloaded += len;
+	            //downloaded += len;
 	            //System.out.println(downloaded + "/" + fileSize + " kB");
 	        }
 	    } finally {
-	        try {
-	            if (i != null) {
-	                i.close();
-	            }
-	        } finally {
-	            if (f != null) {
-	                f.close();
-	            }
-	        }
+	    	if (f != null) {
+                f.close();
+            }
+            if (i != null) {
+                i.close();
+            }
 	    }
 	}
 }
