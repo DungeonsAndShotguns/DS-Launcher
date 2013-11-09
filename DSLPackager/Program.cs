@@ -9,7 +9,7 @@ namespace DSLPackager
     {
         static void Main(string[] args)
         {
-            Tests.TestDSMC();
+            //Tests.TestDSMC();
         }
     }
 }
