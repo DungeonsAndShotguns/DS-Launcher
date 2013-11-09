@@ -18,18 +18,11 @@ namespace DSMinecraft
 
         static void Main(string[] args)
         {
-            // Version Cehcking
-            Releases.Columns.Add(new DataColumn("ReleaseNumber", typeof(string)));
-            Releases.Columns.Add(new DataColumn("DownloadLocation", typeof(string)));
-            Releases.Columns.Add(new DataColumn("ExeToRun", typeof(string)));
-
-            if (CheckVersion(Directory.GetCurrentDirectory()).Contains("Good") == false)
-            {
-                Update update = new Update();
-                //update.Show();
-                System.Windows.Forms.Application.Run(update);
-            }
-
+            Process Update = new Process();
+            Update.StartInfo.FileName = "java";
+            Update.StartInfo.Arguments = "-jar DSUpdater.jar";
+            Update.WaitForExit();
+            Update.Start();
 
             Process Minecraft = new Process();
             Minecraft.StartInfo.UseShellExecute = false;
