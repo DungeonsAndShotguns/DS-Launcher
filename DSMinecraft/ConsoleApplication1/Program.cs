@@ -18,11 +18,14 @@ namespace DSMinecraft
 
         static void Main(string[] args)
         {
-            Process Update = new Process();
-            Update.StartInfo.FileName = "java";
-            Update.StartInfo.Arguments = "-jar DSUpdater.jar";
-            Update.WaitForExit();
-            Update.Start();
+            if (File.Exists("DSUpdater.jar"))
+            {
+                Process Update = new Process();
+                Update.StartInfo.FileName = "java";
+                Update.StartInfo.Arguments = "-jar DSUpdater.jar";
+                Update.Start();
+                Update.WaitForExit();
+            }
 
             Process Minecraft = new Process();
             Minecraft.StartInfo.UseShellExecute = false;

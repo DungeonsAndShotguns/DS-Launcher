@@ -119,7 +119,7 @@ namespace DSLPackager
                 File.Delete(RootPath + "\\.file.blacklist");
             }
 
-            using (StreamWriter blackListStream = new StreamWriter(".file.blacklist"))
+            using (StreamWriter blackListStream = new StreamWriter(RootPath + "\\.file.blacklist"))
             {
                 foreach (string currentLine in FileBlackList)
                 {
