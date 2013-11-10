@@ -21,6 +21,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
@@ -70,9 +71,6 @@ public class DSLauncherHead extends JFrame {
 	/***********************/
 	/* START CONFIGURATION */
 	/***********************/
-	
-	/** Where you might want to go to look for updates **/
-	private final String DEFAULT_UPDATE_URL_STRING = "http://dungeonsandshotguns.org/dsmember/update.txt";
 	
 	/** File Date Format **/
 	private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
@@ -252,18 +250,33 @@ public class DSLauncherHead extends JFrame {
 		try {
 			s = new Scanner(new File(filename));
 			versionFromFile = s.nextLine().trim();
+			appendLine("Found local version file: " + versionFromFile);
 			updateUrlString = s.nextLine().trim();
+			appendLine("Found local update URL: " + updateUrlString);
+			
 		} catch (FileNotFoundException e) {
 			versionFromFile = DEFAULT_VERSION;
-			updateUrlString = DEFAULT_UPDATE_URL_STRING;
+			updateUrlString = "-Insert Link to Update.txt-";
 			
 			appendLine(DEFAULT_FILE_NAME + " missing, a new one was created.");
 			saveToTextFile(filename);
+			
+		} catch (NoSuchElementException e) {
+			appendLine("Error: " + DEFAULT_FILE_NAME + " was missing data!");
+			if (versionFromFile == null)
+				greatestVersionFromServer = "-Insert Version Here-";
+			if (updateUrlString == null)  
+				updateUrlString = "-Insert Link to Update.txt-";
+			saveToTextFile(filename);
+			success = false;
+			//If the file is missing stuff, then exit
+			closeGUI();
 			
 		} catch (Exception e) {
 			if (displayErrorMessages)
 				JOptionPane.showMessageDialog(null, "File read error", "Error", JOptionPane.ERROR_MESSAGE);
 			appendLine(e.getMessage());
+			e.printStackTrace();
 			success = false;
 			//If we can't read the file, we'll just exit
 			closeGUI();
