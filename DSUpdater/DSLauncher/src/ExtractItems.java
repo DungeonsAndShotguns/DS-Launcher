@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
- 
+
 import net.sf.sevenzipjbinding.ExtractOperationResult;
 import net.sf.sevenzipjbinding.ISequentialOutStream;
 import net.sf.sevenzipjbinding.ISevenZipInArchive;
@@ -46,7 +46,11 @@ public class ExtractItems {
                             FileOutputStream fos;
                             try {
                                 File file = new File(item.getPath());
-                                file.getParentFile().mkdirs();
+                                try {
+                                	file.getParentFile().mkdirs();
+                                } catch (NullPointerException e) {
+                                	//do nothing, as the file is in the root
+                                }
                                 fos = new FileOutputStream(file);
                                 fos.write(data);
                                 fos.close();

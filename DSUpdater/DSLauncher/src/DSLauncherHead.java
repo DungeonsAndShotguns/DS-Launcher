@@ -32,7 +32,6 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
-
 import net.sf.sevenzipjbinding.*;
 
 public class DSLauncherHead extends JFrame {
@@ -65,13 +64,15 @@ public class DSLauncherHead extends JFrame {
 	private static final int EQUAL = 0;
 	private static final int OUT_OF_DATE = -1;
 	
+	/* Location of update.txt */
+	private String updateUrlString;
 	
 	/***********************/
 	/* START CONFIGURATION */
 	/***********************/
 	
-	/** Location of update.txt **/
-	private final String UPDATE_URL_STRING = "https://dl.dropboxusercontent.com/s/n4jfufpyh5emqg1/fakeUpdate.txt"; //"https://dl.dropboxusercontent.com/u/5921811/update.txt"
+	/** Where you might want to go to look for updates **/
+	private final String DEFAULT_UPDATE_URL_STRING = "http://dungeonsandshotguns.org/dsmember/update.txt";
 	
 	/** File Date Format **/
 	private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
@@ -86,10 +87,10 @@ public class DSLauncherHead extends JFrame {
 	private final String ERROR_FILENAME = "DS Error Log ";
 	
 	/** DS Launcher Properties Filename **/
-	private final String DEFAULT_FILE_NAME = "DSLauncher.properties";
+	private final String DEFAULT_FILE_NAME = "version.txt";
 	
 	/** DS Launcher Blacklist Filename **/
-	private final String DEFAULT_BLACKLIST_NAME = "data" + File.separator + ".files.blacklist";
+	private final String DEFAULT_BLACKLIST_NAME = ".files.blacklist";
 	
 	/** Default Version Number (incase one doesn't exist) **/
 	private static final String DEFAULT_VERSION = "";
@@ -155,7 +156,6 @@ public class DSLauncherHead extends JFrame {
 			updateDSMinecraftInstallation();
 			saveToTextFile(DEFAULT_FILE_NAME);
 			
-			
 			if (success) {
 				saveConsoleLog(UPDATE_FILENAME + dateFormat.format(new Date()) + ".txt");
 				if (displayUpdateMessages)
@@ -207,18 +207,6 @@ public class DSLauncherHead extends JFrame {
 		setLocationRelativeTo(null);
 		
 		setResizable(isConsoleResizable);
-		
-		try {
-			updateUrl = new URL(UPDATE_URL_STRING);
-		} catch (MalformedURLException e) {
-			//Uhhhh... it broke?  No really, if this breaks, I think You need to reinstall Java...
-			//Check the spelling on the updateUrl... it might be wrong?
-			appendLine("Error: URL could not be made");
-			appendLine(e.getMessage());
-			saveConsoleLog(ERROR_FILENAME + dateFormat.format(new Date()) + ".txt");
-			success = false;
-			
-		}
 	}
 	
 	/**
@@ -226,6 +214,18 @@ public class DSLauncherHead extends JFrame {
 	 */
 	private void init() {
 		loadFromTextFile(DEFAULT_FILE_NAME);
+		
+		try {
+			updateUrl = new URL(updateUrlString);
+		} catch (MalformedURLException e) {
+			//Uhhhh... it broke?  No really, if this breaks, I think You need to reinstall Java...
+			//Check the spelling on the updateUrl... it might be wrong?
+			appendLine("Error: URL could not be made");
+			appendLine(e.getMessage());
+			saveConsoleLog(ERROR_FILENAME + dateFormat.format(new Date()) + ".txt");
+			success = false;
+		}
+		
 		getVersionsFromServer();
 	}
 	
@@ -252,11 +252,13 @@ public class DSLauncherHead extends JFrame {
 		try {
 			s = new Scanner(new File(filename));
 			versionFromFile = s.nextLine().trim();
-			
+			updateUrlString = s.nextLine().trim();
 		} catch (FileNotFoundException e) {
 			versionFromFile = DEFAULT_VERSION;
-			saveToTextFile(filename);
+			updateUrlString = DEFAULT_UPDATE_URL_STRING;
+			
 			appendLine(DEFAULT_FILE_NAME + " missing, a new one was created.");
+			saveToTextFile(filename);
 			
 		} catch (Exception e) {
 			if (displayErrorMessages)
@@ -277,6 +279,7 @@ public class DSLauncherHead extends JFrame {
 		try{
 			out = new PrintWriter(new BufferedWriter(new FileWriter(filename)));
 			out.println(greatestVersionFromServer);	
+			out.println(updateUrlString);
 			
 		} catch (IOException e) {
 			if (displayErrorMessages)
@@ -406,7 +409,7 @@ public class DSLauncherHead extends JFrame {
 			//Compare all parts with each other, starting with the leftmost parts
 			for (int i=0; i<vfParts.length; i++) {
 				//Compares the two parts lexicographically.
-				int result = vfParts[i].compareTo(vsParts[i]);
+				int result = vfParts[i].hashCode() - vsParts[i].hashCode();
 				if (result > 0) {
 					return GREATER;
 				} else if (result < 0) {
