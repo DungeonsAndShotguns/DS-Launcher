@@ -1,4 +1,5 @@
-package DSLauncher.src;
+package src;
+
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -35,6 +36,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
+
 import net.sf.sevenzipjbinding.*;
 
 public class DSLauncherHead extends JFrame {
@@ -194,8 +196,8 @@ public class DSLauncherHead extends JFrame {
 		scrollPane.add(statusPanel);
 		
 		downloadProgress.setIndeterminate(true);
-		downloadProgress.setValue(0);
-		downloadProgress.setForeground(Color.BLACK);
+		//downloadProgress.setValue(0);
+		downloadProgress.setBackground(Color.BLACK);
         downloadProgress.setStringPainted(true);
 		
 		setLayout(new BorderLayout());
@@ -587,6 +589,7 @@ public class DSLauncherHead extends JFrame {
             if (i != null) {
                 i.close();
             }
+            downloadProgress.setIndeterminate(true);
 	    }
 	}
 	
