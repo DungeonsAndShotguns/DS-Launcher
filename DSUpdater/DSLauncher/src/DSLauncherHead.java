@@ -1,6 +1,7 @@
 package DSLauncher.src;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -12,9 +13,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
@@ -30,6 +31,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
@@ -42,6 +44,7 @@ public class DSLauncherHead extends JFrame {
 	/* GUI Stuff */
 	private JLabel titleLabel;
 	private JLabel statusLabel;
+	private JProgressBar downloadProgress;
 	private JScrollPane scrollPane;
 	private JPanel statusPanel;
 	
@@ -100,7 +103,7 @@ public class DSLauncherHead extends JFrame {
 	private final int DEFAULT_HEIGHT = 300;
 	
 	/** File Download buffer **/
-	private final int BUFFER_SIZE = 4096; //4kb buffer
+	private final int BUFFER_SIZE = 16384; //16kb buffer
 	
 	/** Whether or not the user can Resize the console window **/
 	private final boolean isConsoleResizable = false;
@@ -185,14 +188,20 @@ public class DSLauncherHead extends JFrame {
 		statusLabel = new JLabel(statusString);
 		scrollPane = new JScrollPane();
 		statusPanel = new JPanel();
-		
+		downloadProgress = new JProgressBar();
 		statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.PAGE_AXIS));
 		statusPanel.add(statusLabel);
 		scrollPane.add(statusPanel);
 		
+		downloadProgress.setIndeterminate(true);
+		downloadProgress.setValue(0);
+		downloadProgress.setForeground(Color.BLACK);
+        downloadProgress.setStringPainted(true);
+		
 		setLayout(new BorderLayout());
 		add(titleLabel, BorderLayout.NORTH);
 		add(statusPanel, BorderLayout.CENTER);
+		add(downloadProgress, BorderLayout.SOUTH);
 		
 		//Removes the TitleBar, the X, minimize, and maximize buttons
 		setUndecorated(true);
@@ -468,7 +477,7 @@ public class DSLauncherHead extends JFrame {
 		        
 		        appendLine("Extracting " + fileNames.get(i) + " to " + System.getProperty("user.dir"));
 		        try {
-		        	ExtractItems.unzip(fileNames.get(i));
+		        	ExtractItemsStandard.extract(fileNames.get(i));
 		        } catch (Exception e) {
 		        	appendLine("Encountered an Error while Unzipping Files");
 		        	appendLine(e.getMessage());
@@ -547,13 +556,17 @@ public class DSLauncherHead extends JFrame {
 	    FileOutputStream f = null;
 	
 	    try {
-	        URLConnection urlConn = url.openConnection();//connect
+	    	HttpURLConnection connection = (HttpURLConnection)url.openConnection();  
+	    	connection.connect(); 
 	        
-	        i = urlConn.getInputStream();               //get connection inputstream
+	        i = connection.getInputStream();               //get connection inputstream
 	        f = new FileOutputStream(localFilename);    //open outputstream to local file
-	
-	        //int downloaded = 0;
-	        //int fileSize = i.available();
+	        int downloaded = 0;
+	        int fileSize = connection.getContentLength();
+	        
+	        downloadProgress.setMaximum(fileSize);
+	        downloadProgress.setIndeterminate(false);
+	        
 	        
 	        byte[] buffer = new byte[BUFFER_SIZE];
 	        int len;
@@ -561,8 +574,11 @@ public class DSLauncherHead extends JFrame {
 	        //while we have availble data, continue downloading and storing to local file
 	        while ((len = i.read(buffer)) > 0) {  
 	            f.write(buffer, 0, len);
-	            //downloaded += len;
-	            //System.out.println(downloaded + "/" + fileSize + " kB");
+	            if (fileSize > 0) {
+		            downloaded += len;
+		            //System.out.println(downloaded + "/" + fileSize + " kB");
+		            downloadProgress.setValue(downloaded);
+	            }
 	        }
 	    } finally {
 	    	if (f != null) {
@@ -578,7 +594,7 @@ public class DSLauncherHead extends JFrame {
 	 * Appends the given string to the statusLabel JLabel
 	 * @param str String to append
 	 */
-	private void appendLine(String str) {
+	public void appendLine(String str) {
 		System.out.println(str);
 		str.replace("\\n", "<br>");
 		statusString += str + "<br>";
