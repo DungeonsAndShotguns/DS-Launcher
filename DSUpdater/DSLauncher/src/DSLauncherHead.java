@@ -49,6 +49,7 @@ public class DSLauncherHead extends JFrame {
 	private URL updateUrl;
 	
 	private String statusString;
+	private String updateUrlString;
 	private String versionFromFile;
 	private String greatestVersionFromServer;
 	
@@ -65,8 +66,7 @@ public class DSLauncherHead extends JFrame {
 	private static final int EQUAL = 0;
 	private static final int OUT_OF_DATE = -1;
 	
-	/* Location of update.txt */
-	private String updateUrlString;
+	
 	
 	/***********************/
 	/* START CONFIGURATION */
@@ -127,7 +127,7 @@ public class DSLauncherHead extends JFrame {
 	}
 	
 	/**
-	 * This is the main bulk of the program.  Init routines in the beginning, and updates the files appropriatly.
+	 * This is the main bulk of the program.  Init routines in the beginning, and updates the files appropriately.
 	 */
 	private DSLauncherHead() {
 		preInit();
@@ -149,8 +149,7 @@ public class DSLauncherHead extends JFrame {
 			closeGUI();
 		}
 		else if (versionStatus == OUT_OF_DATE) {
-			//Turn the GUI on!
-			setVisible(true);
+			
 			updateDSMinecraftInstallation();
 			saveToTextFile(DEFAULT_FILE_NAME);
 			
@@ -173,7 +172,7 @@ public class DSLauncherHead extends JFrame {
 	}
 
 	/**
-	 * Pre-Inititialization routine, used for variable initialization
+	 * Pre-Inititialization routine, used for variable initialization and instantiation
 	 */
 	private void preInit() {
 		statusString = "";
@@ -208,7 +207,8 @@ public class DSLauncherHead extends JFrame {
 	}
 	
 	/**
-	 * Initialization routine, used to set instance variables
+	 * Initialization routine, used to gather the version from the Text file, and 
+	 * sets up the URL from the value from the text file.
 	 */
 	private void init() {
 		loadFromTextFile(DEFAULT_FILE_NAME);
@@ -218,7 +218,7 @@ public class DSLauncherHead extends JFrame {
 		} catch (MalformedURLException e) {
 			//Uhhhh... it broke?  No really, if this breaks, I think You need to reinstall Java...
 			//Check the spelling on the updateUrl... it might be wrong?
-			appendLine("Error: URL could not be made");
+			appendLine("Error: URL could not be made.  Double check " + DEFAULT_FILE_NAME + " to see if it's spelled properly");
 			appendLine(e.getMessage());
 			saveConsoleLog(ERROR_FILENAME + dateFormat.format(new Date()) + ".txt");
 			success = false;
@@ -329,9 +329,11 @@ public class DSLauncherHead extends JFrame {
 	 * 
 	 *  Modifies:
 	 *  greatestVersionFromServer - When it's through, this will represent the latest version released by the server!
+	 *  numOfUpdates - The number of updates the program has to install
 	 *  ArrayList<String> versions
 	 *  ArrayList<String> downloadUrls
 	 *  ArrayList<String> fileNames
+	 *  
 	 */
 	private void getVersionsFromServer() {
 		appendLine("Obtaining version from server.");
@@ -349,14 +351,10 @@ public class DSLauncherHead extends JFrame {
 		    	//Splits the string into parts based on semi-colons, and creates empty strings if there exists ;;
 		    	String[] updateParts = line.replace(" ", "").split(";", -1);
 		    	if(updateParts.length == 3) {
-		    		if (compareVersion(updateParts[0], greatestVersionFromServer) == OUT_OF_DATE){
-		    			appendLine("Update.txt doesn't look right.");
-		    			appendLine("Updates out of order.  Contact your Neighboorhood Server Admin\n");
-						appendLine("Ignoring all updates and ignoring check.");
-						success = false;
-						greatestVersionFromServer = versionFromFile;
-						return;
-		    		} else if (compareVersion(updateParts[0], greatestVersionFromServer) == GREATER) {
+		    		if (compareVersion(updateParts[0], greatestVersionFromServer) == GREATER) {
+		    			//Turn the GUI on!
+		    			setVisible(true);
+		    			
 		    			appendLine("Found Update: " + updateParts[0]);
 		    			greatestVersionFromServer = updateParts[0];
 		    			versions.add(updateParts[0]);
@@ -364,7 +362,14 @@ public class DSLauncherHead extends JFrame {
 				    	fileNames.add(updateParts[2]);
 				    	
 				    	numOfUpdates++;
-		    		} 
+		    		} else if (compareVersion(updateParts[0], greatestVersionFromServer) == OUT_OF_DATE){
+			    			appendLine("Update.txt doesn't look right.");
+			    			appendLine("Updates out of order.  Contact your Neighboorhood Server Admin\n");
+							appendLine("Ignoring all updates and ignoring check.");
+							success = false;
+							greatestVersionFromServer = versionFromFile;
+							return;
+			    	}
 		    	} else {
 		    		appendLine("Update.txt doesn't look right.");
 		    		appendLine("Expected: Version; DownloadURL; FileName\n");
@@ -390,16 +395,15 @@ public class DSLauncherHead extends JFrame {
 				}
 			}
 		}
-		
-		//greatestVersionFromServer = versions.get(numOfUpdates);
 	}
 	
 	/**
-	 * Compares two version Strings lexicographically.  Longer Versions (Parts separated by periods) are considered "more up to date"
+	 * Compares two version Strings using their hashcodes.  Longer Versions (Parts separated by periods) are considered "more up to date"
 	 * 1.1.0 is greater than 1.0.0
-	 * 1.1.0 is greater than 1.0.200A
+	 * 1.1.0 is greater than 1.0.999
 	 * a.0.0 is greater than 1.1.1
-	 * 1.0.0 is greater than 9.9
+	 * 9.0   is greater than 1.0.0
+	 * 1.0.0 is greater than 1.0
 	 * 
 	 * @param vf First Version String
 	 * @param vs Second Version String
@@ -410,6 +414,18 @@ public class DSLauncherHead extends JFrame {
 		String[] vfParts = vf.split("\\.");
 		String[] vsParts = vs.split("\\.");
 		
+		
+		//Compare all parts with each other, starting with the leftmost parts
+		for (int i=0; i<Math.min(vfParts.length, vsParts.length); i++) {
+			//Compares the two parts using their hashcodes.
+			int result = vfParts[i].hashCode() - vsParts[i].hashCode();
+			if (result > 0) {
+				return GREATER;
+			} else if (result < 0) {
+				return OUT_OF_DATE;
+			}
+		}
+		
 		if (vfParts.length>vsParts.length) {
 			/* Version number from the file was "longer" (More numbers separated by a period)
 			 * than the version from the server.  Assume the file is messed up, but somehow "more up to date" */
@@ -418,102 +434,114 @@ public class DSLauncherHead extends JFrame {
 			/* Version number from server was "longer" (More numbers separated by a period)
 			 * than the version from the text file.  Assume the server is up to date. */
 			 return OUT_OF_DATE;
-		} else {
-			//Compare all parts with each other, starting with the leftmost parts
-			for (int i=0; i<vfParts.length; i++) {
-				//Compares the two parts lexicographically.
-				int result = vfParts[i].hashCode() - vsParts[i].hashCode();
-				if (result > 0) {
-					return GREATER;
-				} else if (result < 0) {
-					return OUT_OF_DATE;
-				}
-			}
-			
-			return EQUAL;
 		}
+		
+		return EQUAL;
 	}
 	
+	/**
+	 * Tries to update the Installation from a downloaded 7z archive.
+	 * 
+	 * 1.) Download the 7z archive to a -filename-
+	 * 2.) Extract the archive at the running directory
+	 * 3.) Delete contents from .files.blacklist
+	 * 4.) Try to delete .files.blacklist
+	 * 5.) Try to delete -filename-
+	 */
 	private void updateDSMinecraftInstallation() {
-		appendLine("Updating from version: " + versionFromFile);
-		for (int i=0; i<numOfUpdates; i++) {
-			
-	        appendLine("Starting Download: " + fileNames.get(i));
-	        try{
-	        	appendLine("Downloading Update: Please Wait...");
-		        downloadFromURL(new URL(downloadUrls.get(i)), fileNames.get(i));
-	        } catch(IOException e) {
-	        	appendLine("File downloading Error!");
-	        	appendLine(e.getMessage());
-	        	success = false;
-	        }
-	        
-	        appendLine("Installing: " + versions.get(i));
-	        
-	        appendLine("Extracting " + fileNames.get(i) + " to " + System.getProperty("user.dir"));
-	        try {
-	        	ExtractItems.unzip(fileNames.get(i));
-	        } catch (Exception e) {
-	        	appendLine("Encountered an Error while Unzipping Files");
-	        	appendLine(e.getMessage());
-	        }
-
-	        appendLine("Opening: " + DEFAULT_BLACKLIST_NAME);
-	        
-	        BufferedReader in = null;
-	        try {
-	        	in = new BufferedReader(new FileReader(DEFAULT_BLACKLIST_NAME));
-		        String line = in.readLine();  
-		        while (line != null)  
-		        {  
-		        	//Works on windows installations
-		        	line = line.replaceAll("/", Matcher.quoteReplacement(File.separator));
-		        	//Doesn't work... but may be neccessary for Linux distro's
-		        	//line = line.replaceAll("\\", Matcher.quoteReplacement(File.separator));
-
-		        	appendLine("Removing " + line);
-		        	Files.deleteIfExists(Paths.get(line));
-		        	line = in.readLine();  
-		        } 
+		if (success) {
+			appendLine("Updating from version: " + versionFromFile);
+			for (int i=0; i<numOfUpdates; i++) {
 				
-				if (in != null) {
-					in.close();
-				}
-	        } catch (IOException e) {
-	        	appendLine("Warning: " + DEFAULT_BLACKLIST_NAME + " doesn't exist, or couldn't be opened properly.");
-	        	appendLine(e.getMessage());
-	        } finally {
-	        	if (in != null) {
-	        		try {
+		        appendLine("Starting Download: " + fileNames.get(i));
+		        try{
+		        	appendLine("Downloading Update: Please Wait...");
+			        downloadFromURL(new URL(downloadUrls.get(i)), fileNames.get(i));
+		        } catch(IOException e) {
+		        	appendLine("File downloading Error!");
+		        	appendLine(e.getMessage());
+		        	success = false;
+		        	return;
+		        }
+		        
+		        appendLine("Installing: " + versions.get(i));
+		        
+		        appendLine("Extracting " + fileNames.get(i) + " to " + System.getProperty("user.dir"));
+		        try {
+		        	ExtractItems.unzip(fileNames.get(i));
+		        } catch (Exception e) {
+		        	appendLine("Encountered an Error while Unzipping Files");
+		        	appendLine(e.getMessage());
+		        }
+	
+		        appendLine("Opening: " + DEFAULT_BLACKLIST_NAME);
+		        
+		        BufferedReader in = null;
+		        try {
+		        	in = new BufferedReader(new FileReader(DEFAULT_BLACKLIST_NAME));
+			        String line = in.readLine();  
+			        while (line != null)  
+			        {  
+			        	//Works on windows installations
+			        	line = line.replaceAll("/", Matcher.quoteReplacement(File.separator));
+			        	
+			        	//Next line doesn't work... but may be necessary for Linux distro's
+			        	//line = line.replaceAll("\\", Matcher.quoteReplacement(File.separator));
+	
+			        	appendLine("Removing " + line);
+			        	Files.deleteIfExists(Paths.get(line));
+			        	line = in.readLine();  
+			        } 
+					
+					if (in != null) {
 						in.close();
-					} catch (IOException e) {
-						appendLine("Error Closing " + DEFAULT_BLACKLIST_NAME);
-						appendLine(e.getMessage());
 					}
-	        	}
-	        }
-	        
-	        appendLine("Removing " + DEFAULT_BLACKLIST_NAME);
-	        try {
-				Files.deleteIfExists(Paths.get(DEFAULT_BLACKLIST_NAME));
-			} catch (IOException e) {
-				appendLine("Warning: " + DEFAULT_BLACKLIST_NAME + " isn't behaving properly.");
-				appendLine(e.getMessage());
+		        } catch (IOException e) {
+		        	appendLine("Warning: " + DEFAULT_BLACKLIST_NAME + " doesn't exist, or couldn't be opened properly.");
+		        	appendLine(e.getMessage());
+		        } finally {
+		        	if (in != null) {
+		        		try {
+							in.close();
+						} catch (IOException e) {
+							appendLine("Error Closing " + DEFAULT_BLACKLIST_NAME);
+							appendLine(e.getMessage());
+						}
+		        	}
+		        }
+		        
+		        appendLine("Removing " + DEFAULT_BLACKLIST_NAME);
+		        try {
+					Files.deleteIfExists(Paths.get(DEFAULT_BLACKLIST_NAME));
+				} catch (IOException e) {
+					appendLine("Warning: " + DEFAULT_BLACKLIST_NAME + " isn't behaving properly.");
+					appendLine(e.getMessage());
+				}
+		        
+		        appendLine("Removing " + fileNames.get(i));
+		        try {
+					Files.deleteIfExists(Paths.get(fileNames.get(i)));
+				} catch (IOException e) {
+					appendLine("Warning: " + fileNames.get(i) + " isn't behaving properly.");
+					appendLine(e.getMessage());
+				}
+		        
+				versionFromFile = versions.get(i);
 			}
-	        
-	        appendLine("Removing " + fileNames.get(i));
-	        try {
-				Files.deleteIfExists(Paths.get(fileNames.get(i)));
-			} catch (IOException e) {
-				appendLine("Warning: " + fileNames.get(i) + " isn't behaving properly.");
-				appendLine(e.getMessage());
-			}
-	        
-			versionFromFile = versions.get(i);
+			appendLine("Updated to version: " + versionFromFile);
+		} else {
+			appendLine("An error occured.  Skipping Updates.");
 		}
-		appendLine("Updated to version: " + versionFromFile);
 	}
 	
+	/**
+	 * Downloads a file hosted at a given URL, and stores it as a local file (in the running directory)
+	 * with the given name
+	 *  
+	 * @param url - Where the file is hosted
+	 * @param localFilename - What to save the file as
+	 * @throws IOException - Errors that occur using the FileOutputStream
+	 */
 	void downloadFromURL(URL url, String localFilename) throws IOException {
 	    InputStream i = null;
 	    FileOutputStream f = null;
