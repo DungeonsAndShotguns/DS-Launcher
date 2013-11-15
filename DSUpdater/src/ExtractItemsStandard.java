@@ -20,124 +20,125 @@ import net.sf.sevenzipjbinding.SevenZipException;
 import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
 
 public class ExtractItemsStandard {
-    public static class MyExtractCallback implements IArchiveExtractCallback {
-        private int hash = 0;
-        private int size = 0;
-        private int index;
-        private ISevenZipInArchive inArchive;
+	public static class MyExtractCallback implements IArchiveExtractCallback {
+		private int hash = 0;
+		private int size = 0;
+		private int index;
+		private ISevenZipInArchive inArchive;
 
-        public MyExtractCallback(ISevenZipInArchive inArchive) {
-            this.inArchive = inArchive;
-        }
+		public MyExtractCallback(ISevenZipInArchive inArchive) {
+			this.inArchive = inArchive;
+		}
 
-        public ISequentialOutStream getStream(final int index, 
-                ExtractAskMode extractAskMode) throws SevenZipException {
-            this.index = index;
-            if (extractAskMode != ExtractAskMode.EXTRACT) {
-                return null;
-            }
-            return new ISequentialOutStream() {
+		public ISequentialOutStream getStream(final int index,
+				ExtractAskMode extractAskMode) throws SevenZipException {
+			this.index = index;
+			if (extractAskMode != ExtractAskMode.EXTRACT) {
+				return null;
+			}
+			return new ISequentialOutStream() {
 
-                public int write(byte[] data) throws SevenZipException {
-                	FileOutputStream fos;
-                    
-                	try {
-                        File file = new File((String) inArchive.getProperty(index, PropID.PATH));
-                        try {
-                        	file.getParentFile().mkdirs();
-                        } catch (NullPointerException e) {
-                        	//File is in the root directory
-                        }
-                        fos = new FileOutputStream(file);
-                        fos.write(data);
-                        fos.close();
+				public int write(byte[] data) throws SevenZipException {
+					FileOutputStream fos;
 
-                    } catch (FileNotFoundException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-	                }
-                	
-                	hash ^= Arrays.hashCode(data);
-                    size += data.length;
-                    return data.length; // Return amount of proceed data
-                }
-            };
-        }
+					try {
+						File file = new File((String) inArchive.getProperty(
+								index, PropID.PATH));
+						try {
+							file.getParentFile().mkdirs();
+						} catch (NullPointerException e) {
+							// File is in the root directory
+						}
+						fos = new FileOutputStream(file);
+						fos.write(data);
+						fos.close();
 
-        public void prepareOperation(ExtractAskMode extractAskMode) 
-                throws SevenZipException {
-        }
+					} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 
-        public void setOperationResult(ExtractOperationResult 
-                extractOperationResult) throws SevenZipException {
-            if (extractOperationResult != ExtractOperationResult.OK) {
-                System.err.println("Extraction error");
-            } else {
-                System.out.println(String.format("%9X | %10s | %s", hash, size,// 
-                        inArchive.getProperty(index, PropID.PATH)));
-                hash = 0;
-                size = 0;
-            }
-        }
+					hash ^= Arrays.hashCode(data);
+					size += data.length;
+					return data.length; // Return amount of proceed data
+				}
+			};
+		}
 
-        public void setCompleted(long completeValue) throws SevenZipException {
-        }
+		public void prepareOperation(ExtractAskMode extractAskMode)
+				throws SevenZipException {
+		}
 
-        public void setTotal(long total) throws SevenZipException {
-        }
+		public void setOperationResult(
+				ExtractOperationResult extractOperationResult)
+				throws SevenZipException {
+			if (extractOperationResult != ExtractOperationResult.OK) {
+				System.err.println("Extraction error");
+			} else {
+				System.out.println(String.format("%9X | %10s | %s", hash, size,//
+						inArchive.getProperty(index, PropID.PATH)));
+				hash = 0;
+				size = 0;
+			}
+		}
 
-    }
+		public void setCompleted(long completeValue) throws SevenZipException {
+		}
 
-    public static void extract(String filename) {
-        RandomAccessFile randomAccessFile = null;
-        ISevenZipInArchive inArchive = null;
-        try {
-            randomAccessFile = new RandomAccessFile(filename, "r");
-            inArchive = SevenZip.openInArchive(null, // autodetect archive type
-                    new RandomAccessFileInStream(randomAccessFile));
+		public void setTotal(long total) throws SevenZipException {
+		}
 
-            System.out.println("   Hash   |    Size    | Filename");
-            System.out.println("----------+------------+---------");
+	}
 
-            int count = inArchive.getNumberOfItems();
-            List<Integer> itemsToExtract = new ArrayList<Integer>();
-            for (int i = 0; i < count; i++) {
-                if (!((Boolean) inArchive.getProperty(i, PropID.IS_FOLDER))
-                        .booleanValue()) {
-                    itemsToExtract.add(Integer.valueOf(i));
-                }
-            }
-            int[] items = new int[itemsToExtract.size()];
-            int i = 0;
-            for (Integer integer : itemsToExtract) {
-                items[i++] = integer.intValue();
-            }
-            inArchive.extract(items, false, // Non-test mode
-                    new MyExtractCallback(inArchive));
-            
-            
-        } catch (Exception e) {
-            System.err.println("Error occurs: " + e);
-            e.printStackTrace();
-            System.exit(1);
-        } finally {
-            if (inArchive != null) {
-                try {
-                    inArchive.close();
-                } catch (SevenZipException e) {
-                    System.err.println("Error closing archive: " + e);
-                }
-            }
-            if (randomAccessFile != null) {
-                try {
-                    randomAccessFile.close();
-                } catch (IOException e) {
-                    System.err.println("Error closing file: " + e);
-                }
-            }
-        }
-    }
+	public static void extract(String filename) {
+		RandomAccessFile randomAccessFile = null;
+		ISevenZipInArchive inArchive = null;
+		try {
+			randomAccessFile = new RandomAccessFile(filename, "r");
+			inArchive = SevenZip.openInArchive(null, // autodetect archive type
+					new RandomAccessFileInStream(randomAccessFile));
+
+			System.out.println("   Hash   |    Size    | Filename");
+			System.out.println("----------+------------+---------");
+
+			int count = inArchive.getNumberOfItems();
+			List<Integer> itemsToExtract = new ArrayList<Integer>();
+			for (int i = 0; i < count; i++) {
+				if (!((Boolean) inArchive.getProperty(i, PropID.IS_FOLDER))
+						.booleanValue()) {
+					itemsToExtract.add(Integer.valueOf(i));
+				}
+			}
+			int[] items = new int[itemsToExtract.size()];
+			int i = 0;
+			for (Integer integer : itemsToExtract) {
+				items[i++] = integer.intValue();
+			}
+			inArchive.extract(items, false, // Non-test mode
+					new MyExtractCallback(inArchive));
+
+		} catch (Exception e) {
+			System.err.println("Error occurs: " + e);
+			e.printStackTrace();
+			System.exit(1);
+		} finally {
+			if (inArchive != null) {
+				try {
+					inArchive.close();
+				} catch (SevenZipException e) {
+					System.err.println("Error closing archive: " + e);
+				}
+			}
+			if (randomAccessFile != null) {
+				try {
+					randomAccessFile.close();
+				} catch (IOException e) {
+					System.err.println("Error closing file: " + e);
+				}
+			}
+		}
+	}
 }
