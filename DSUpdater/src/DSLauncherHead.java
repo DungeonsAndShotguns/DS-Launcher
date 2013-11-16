@@ -35,6 +35,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 
 import net.sf.sevenzipjbinding.*;
 
@@ -198,6 +199,9 @@ public class DSLauncherHead extends JFrame {
 		downloadUrls = new ArrayList<String>();
 		fileNames = new ArrayList<String>();
 
+		UIManager.put("ProgressBar.selectionBackground", Color.DARK_GRAY);
+		UIManager.put("ProgressBar.selectionForeground", new Color(75,75,75));
+		
 		titleLabel = new JLabel(name);
 		titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		statusLabel = new JLabel(statusString);
@@ -209,10 +213,8 @@ public class DSLauncherHead extends JFrame {
 		scrollPane.add(statusPanel);
 
 		downloadProgress.setIndeterminate(true);
-		// downloadProgress.setValue(0);
-		downloadProgress.setBackground(Color.BLACK);
 		downloadProgress.setStringPainted(true);
-
+		
 		setLayout(new BorderLayout());
 		add(titleLabel, BorderLayout.NORTH);
 		add(statusPanel, BorderLayout.CENTER);
@@ -383,18 +385,22 @@ public class DSLauncherHead extends JFrame {
 				// creates empty strings if there exists ;;
 				String[] updateParts = line.replace(" ", "").split(";", -1);
 				if (updateParts.length == 3) {
-					if (compareVersion(updateParts[0],
-							greatestVersionFromServer) == GREATER) {
-						// Turn the GUI on!
-						setVisible(true);
-
-						appendLine("Found Update: " + updateParts[0]);
+					if (compareVersion(updateParts[0], greatestVersionFromServer) == GREATER) {
 						greatestVersionFromServer = updateParts[0];
-						versions.add(updateParts[0]);
-						downloadUrls.add(updateParts[1]);
-						fileNames.add(updateParts[2]);
+						if (compareVersion(updateParts[0], versionFromFile) == GREATER) {
+							//Turn the GUI on!
+							setVisible(true);
+	
+							appendLine("Found Update: " + updateParts[0]);
+							
+							versions.add(updateParts[0]);
+							downloadUrls.add(updateParts[1]);
+							fileNames.add(updateParts[2]);
+							
+							numOfUpdates++;
+						}
 
-						numOfUpdates++;
+						
 					} else if (compareVersion(updateParts[0],
 							greatestVersionFromServer) == OUT_OF_DATE) {
 						appendLine("Update.txt doesn't look right.");
@@ -488,7 +494,7 @@ public class DSLauncherHead extends JFrame {
 	 */
 	private void updateDSMinecraftInstallation() {
 		if (success) {
-			appendLine("Updating from version: " + versionFromFile);
+			appendLine("Updating from version: " + (versionFromFile.equals("")? "null" : versionFromFile));
 			for (int i = 0; i < numOfUpdates; i++) {
 
 				appendLine("Starting Download: " + fileNames.get(i));
