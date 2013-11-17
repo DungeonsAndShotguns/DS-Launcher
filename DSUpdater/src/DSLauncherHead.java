@@ -112,7 +112,7 @@ public class DSLauncherHead extends JFrame {
 	private final int DEFAULT_HEIGHT = 211;
 
 	/** File Download buffer **/
-	private final int BUFFER_SIZE = 16384; // 16kb buffer
+	private final int BUFFER_SIZE = 1024; // 16kb buffer
 
 	/** Choose to display "popup" update messages **/
 	private final boolean displayUpdateMessages = false;
@@ -203,6 +203,7 @@ public class DSLauncherHead extends JFrame {
 		updatePanel = new DrawBackground();
 		downloadProgress = new JProgressBar();
 		
+		downloadProgress.setSize(new Dimension(DEFAULT_WIDTH-100, 20));
 		downloadProgress.setIndeterminate(true);
 		downloadProgress.setStringPainted(true);
 		downloadProgress.addChangeListener(new ChangeListener() {
@@ -534,7 +535,7 @@ public class DSLauncherHead extends JFrame {
 				appendLine("Extracting " + fileNames.get(i) + " to " + System.getProperty("user.dir"));
 				downloadProgress.setString("Extrating " + fileNames.get(i) + " to local directory");
 				try {
-					ExtractItemsStandard.extract(fileNames.get(i));
+					statusString = ExtractItemsStandard.extract(fileNames.get(i), statusString);
 				} catch (Exception e) {
 					appendLine("Encountered an Error while Unzipping Files");
 					appendLine(e.getMessage());
@@ -632,7 +633,7 @@ public class DSLauncherHead extends JFrame {
 			byte[] buffer = new byte[BUFFER_SIZE];
 			int len;
 
-			// while we have availble data, continue downloading and storing to
+			// while we have available data, continue downloading and storing to
 			// local file
 			while ((len = i.read(buffer)) > 0) {
 				f.write(buffer, 0, len);

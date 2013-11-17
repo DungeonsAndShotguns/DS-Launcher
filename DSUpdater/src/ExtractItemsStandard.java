@@ -25,11 +25,18 @@ public class ExtractItemsStandard {
 		private int size = 0;
 		private int index;
 		private ISevenZipInArchive inArchive;
+		private String logging;
+		private String lastFile = "";
 
-		public MyExtractCallback(ISevenZipInArchive inArchive) {
+		public MyExtractCallback(ISevenZipInArchive inArchive, String logging) {
 			this.inArchive = inArchive;
+			this.logging = logging;
 		}
 
+		public String getLog() {
+			return logging;
+		}
+		
 		public ISequentialOutStream getStream(final int index,
 				ExtractAskMode extractAskMode) throws SevenZipException {
 			this.index = index;
@@ -39,26 +46,32 @@ public class ExtractItemsStandard {
 			return new ISequentialOutStream() {
 
 				public int write(byte[] data) throws SevenZipException {
-					FileOutputStream fos;
-
+					FileOutputStream out = null;
+					
 					try {
-						File file = new File((String) inArchive.getProperty(
-								index, PropID.PATH));
+						File file = new File((String) inArchive.getProperty(index, PropID.PATH));
 						try {
 							file.getParentFile().mkdirs();
 						} catch (NullPointerException e) {
 							// File is in the root directory
 						}
-						fos = new FileOutputStream(file);
-						fos.write(data);
-						fos.close();
+						if (lastFile.equals((String) inArchive.getProperty(index, PropID.PATH)))
+							appendLine("GOT ONE! " + lastFile);
+						out = new FileOutputStream(file, (lastFile.equals((String) inArchive.getProperty(index, PropID.PATH))));
+						out.write(data);
+						lastFile = (String) inArchive.getProperty(index, PropID.PATH);
 
 					} catch (FileNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						appendLine(e.getMessage());
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						appendLine(e.getMessage());
+					} finally {
+						if (out != null)
+							try {
+								out.close();
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
 					}
 
 					hash ^= Arrays.hashCode(data);
@@ -76,9 +89,10 @@ public class ExtractItemsStandard {
 				ExtractOperationResult extractOperationResult)
 				throws SevenZipException {
 			if (extractOperationResult != ExtractOperationResult.OK) {
-				System.err.println("Extraction error");
+				appendLine("Extraction error");
+				
 			} else {
-				System.out.println(String.format("%9X | %10s | %s", hash, size,//
+				appendLine(String.format("%9X | %10s | %s", hash, size,
 						inArchive.getProperty(index, PropID.PATH)));
 				hash = 0;
 				size = 0;
@@ -90,17 +104,28 @@ public class ExtractItemsStandard {
 
 		public void setTotal(long total) throws SevenZipException {
 		}
+		
+		public void appendLine(String str) {
+			System.out.println(str);
+			logging += (str + System.lineSeparator());
+		}
+		
 
 	}
 
-	public static void extract(String filename) {
+	public static String extract(String filename, String log) {
 		RandomAccessFile randomAccessFile = null;
 		ISevenZipInArchive inArchive = null;
+		
+		MyExtractCallback m = null;
+		
 		try {
 			randomAccessFile = new RandomAccessFile(filename, "r");
 			inArchive = SevenZip.openInArchive(null, // autodetect archive type
 					new RandomAccessFileInStream(randomAccessFile));
 
+			log += "   Hash   |    Size    | Filename" + System.lineSeparator();
+			log += "----------+------------+---------" + System.lineSeparator();
 			System.out.println("   Hash   |    Size    | Filename");
 			System.out.println("----------+------------+---------");
 
@@ -117,8 +142,10 @@ public class ExtractItemsStandard {
 			for (Integer integer : itemsToExtract) {
 				items[i++] = integer.intValue();
 			}
-			inArchive.extract(items, false, // Non-test mode
-					new MyExtractCallback(inArchive));
+			
+			m = new MyExtractCallback(inArchive, log);
+			inArchive.extract(items, false, m);
+					
 
 		} catch (Exception e) {
 			System.err.println("Error occurs: " + e);
@@ -140,5 +167,6 @@ public class ExtractItemsStandard {
 				}
 			}
 		}
+		return m.getLog();
 	}
 }
