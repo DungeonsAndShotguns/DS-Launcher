@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.NoSuchElementException;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
@@ -52,6 +53,7 @@ public class DSLauncherHead extends JFrame {
 	private JPanel updatePanel;
 	private JProgressBar downloadProgress;
 	private Image background;
+	private Image icon;
 	
 	/* Instance Variables */
 	private URL updateUrl;
@@ -99,20 +101,23 @@ public class DSLauncherHead extends JFrame {
 	/** DS Launcher Blacklist Filename **/
 	private final String DEFAULT_BLACKLIST_NAME = ".files.blacklist";
 
-	/** Default Version Number (incase one doesn't exist) **/
+	/** Default Version Number **/
 	private final String DEFAULT_VERSION = "";
 
 	/** Background image file **/
-	private final File backgroundImageLocation = new File("bin" + File.separator + "DSUpdater.png");
+	private final File backgroundImageLocation = new File("bin" + File.separator + "assets" + File.separator + "DSUpdater" + new Random().nextInt(5) + ".png");
+	
+	/** Background image file **/
+	private final File iconImageLocation = new File("bin" + File.separator + "assets" + File.separator + "DSIcon.png");
 	
 	/** Pixel Width of Window **/
-	private final int DEFAULT_WIDTH = 623;
+	private final int DEFAULT_WIDTH = 646;
 
 	/** Pixel Height of Window **/
 	private final int DEFAULT_HEIGHT = 211;
 
 	/** File Download buffer **/
-	private final int BUFFER_SIZE = 1024; // 16kb buffer
+	private final int BUFFER_SIZE = 4096; // 4kb buffer
 
 	/** Choose to display "popup" update messages **/
 	private final boolean displayUpdateMessages = false;
@@ -672,17 +677,19 @@ public class DSLauncherHead extends JFrame {
 		public DrawBackground() {
 			setBackground(new Color(0,0,0,0));
 			setOpaque(false);
-		}
-		
-		@Override
-		public void paint(Graphics g) {
 			try {
 				background = ImageIO.read(backgroundImageLocation);
-				g.drawImage(background, 0, 0, null);
+				icon = ImageIO.read(iconImageLocation);
 			} catch (IOException e) {
 				appendLine("Error: Couldn't Open " + backgroundImageLocation);
 				appendLine(e.getMessage());
 			}	
+		}
+		
+		@Override
+		public void paint(Graphics g) {
+			g.drawImage(background, 23, 11, null);
+			g.drawImage(icon, 0, 0, null);
 		}
 	}
 }
