@@ -2,6 +2,9 @@ package src;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -26,30 +29,28 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
-import javax.swing.BoxLayout;
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JRootPane;
-import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import net.sf.sevenzipjbinding.*;
 
 public class DSLauncherHead extends JFrame {
-	/** Auto Generated ID **/
+	/* Auto Generated ID */
 	private static final long serialVersionUID = 4255942636165851766L;
 
 	/* GUI Stuff */
-	private JLabel titleLabel;
-	private JLabel statusLabel;
+	private JPanel downloadPanel;
+	private JPanel updatePanel;
 	private JProgressBar downloadProgress;
-	private JScrollPane scrollPane;
-	private JPanel statusPanel;
-
+	private Image background;
+	
 	/* Instance Variables */
 	private URL updateUrl;
 
@@ -76,8 +77,7 @@ public class DSLauncherHead extends JFrame {
 	/***********************/
 
 	/** File Date Format **/
-	private final DateFormat dateFormat = new SimpleDateFormat(
-			"yyyy-MM-dd HH.mm.ss");
+	private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
 
 	/** System Application Name **/
 	private final String name = "DSUpdater";
@@ -95,19 +95,19 @@ public class DSLauncherHead extends JFrame {
 	private final String DEFAULT_BLACKLIST_NAME = ".files.blacklist";
 
 	/** Default Version Number (incase one doesn't exist) **/
-	private static final String DEFAULT_VERSION = "";
+	private final String DEFAULT_VERSION = "";
 
+	/** Background image file **/
+	private final File backgroundImageLocation = new File("bin" + File.separator + "DSUpdater.png");
+	
 	/** Pixel Width of Window **/
-	private final int DEFAULT_WIDTH = 400;
+	private final int DEFAULT_WIDTH = 623;
 
 	/** Pixel Height of Window **/
-	private final int DEFAULT_HEIGHT = 300;
+	private final int DEFAULT_HEIGHT = 211;
 
 	/** File Download buffer **/
 	private final int BUFFER_SIZE = 16384; // 16kb buffer
-
-	/** Whether or not the user can Resize the console window **/
-	private final boolean isConsoleResizable = false;
 
 	/** Choose to display "popup" update messages **/
 	private final boolean displayUpdateMessages = false;
@@ -123,10 +123,9 @@ public class DSLauncherHead extends JFrame {
 	 * Main method to be called externally. Creates an instance of
 	 * DSLauncherHead, which starts off this carnival ride!
 	 * 
-	 * @param args
-	 *            Command Line Arguments... currently unused TODO: Consider
-	 *            making a CLA to start the jar with the terminal in the
-	 *            background, or always show its log.
+	 * @param args Command Line Arguments... currently unused TODO: Consider
+	 *             making a CLA to start the jar with the terminal in the
+	 *             background, or always show its log.
 	 */
 	public static void main(String[] args) {
 		new DSLauncherHead();
@@ -141,8 +140,7 @@ public class DSLauncherHead extends JFrame {
 		init();
 		postInit();
 
-		int versionStatus = compareVersion(versionFromFile,
-				greatestVersionFromServer);
+		int versionStatus = compareVersion(versionFromFile, greatestVersionFromServer);
 
 		if (versionStatus == GREATER) {
 			setVisible(true);
@@ -151,11 +149,10 @@ public class DSLauncherHead extends JFrame {
 			appendLine("Server Version: " + greatestVersionFromServer);
 			appendLine("Local Version: " + versionFromFile);
 
-			saveConsoleLog(ERROR_FILENAME + dateFormat.format(new Date())
-					+ ".txt");
+			saveConsoleLog(ERROR_FILENAME + dateFormat.format(new Date()) + ".txt");
 			if (displayErrorMessages)
 				JOptionPane.showMessageDialog(null,
-						"You appear to be a couple versions ahead of us.\nDid you modify "
+						"You appear to be a couple versions ahead of us." + System.lineSeparator() + "Did you modify "
 								+ DEFAULT_FILE_NAME + "?", "Version Mismatch",
 						JOptionPane.WARNING_MESSAGE);
 			closeGUI();
@@ -165,27 +162,21 @@ public class DSLauncherHead extends JFrame {
 			saveToTextFile(DEFAULT_FILE_NAME);
 
 			if (success) {
-				saveConsoleLog(UPDATE_FILENAME + dateFormat.format(new Date())
-						+ ".txt");
+				saveConsoleLog(UPDATE_FILENAME + dateFormat.format(new Date()) + ".txt");
 				if (displayUpdateMessages)
-					JOptionPane.showMessageDialog(null,
-							"Your version was updated to "
-									+ greatestVersionFromServer, "Updated",
-							JOptionPane.PLAIN_MESSAGE);
+					JOptionPane.showMessageDialog(null, "Your version was updated to " +
+							greatestVersionFromServer, "Updated", JOptionPane.PLAIN_MESSAGE);
 			} else {
-				saveConsoleLog(ERROR_FILENAME + dateFormat.format(new Date())
-						+ ".txt");
+				saveConsoleLog(ERROR_FILENAME + dateFormat.format(new Date()) + ".txt");
 				if (displayErrorMessages)
-					JOptionPane.showMessageDialog(null, name
-							+ " Encountered a Failure: "
-							+ greatestVersionFromServer, "Warning",
-							JOptionPane.WARNING_MESSAGE);
+					JOptionPane.showMessageDialog(null, name + " Encountered a Failure: " + greatestVersionFromServer,
+							"Warning", JOptionPane.WARNING_MESSAGE);
 			}
 
 		} else if (versionStatus == EQUAL) {
 			appendLine("You are up to date!");
 		}
-
+		
 		closeGUI();
 	}
 
@@ -198,39 +189,53 @@ public class DSLauncherHead extends JFrame {
 		versions = new ArrayList<String>();
 		downloadUrls = new ArrayList<String>();
 		fileNames = new ArrayList<String>();
-
+		
 		UIManager.put("ProgressBar.selectionBackground", Color.DARK_GRAY);
 		UIManager.put("ProgressBar.selectionForeground", new Color(75,75,75));
+		UIManager.put("ProgressBar.horizontalSize", new Dimension(DEFAULT_WIDTH-100, 20));
 		
-		titleLabel = new JLabel(name);
-		titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		statusLabel = new JLabel(statusString);
-		scrollPane = new JScrollPane();
-		statusPanel = new JPanel();
+		downloadPanel = new JPanel();
+		updatePanel = new DrawBackground();
 		downloadProgress = new JProgressBar();
-		statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.PAGE_AXIS));
-		statusPanel.add(statusLabel);
-		scrollPane.add(statusPanel);
-
+		
 		downloadProgress.setIndeterminate(true);
 		downloadProgress.setStringPainted(true);
+		downloadProgress.addChangeListener(new ChangeListener() {
+		    @Override
+			public void stateChanged(ChangeEvent e) {
+		    	downloadProgress.setString(String.format("Downloading: " + "" + " %s%%",
+		    			downloadProgress.getValue()));
+		    }
+		  });
 		
-		setLayout(new BorderLayout());
-		add(titleLabel, BorderLayout.NORTH);
-		add(statusPanel, BorderLayout.CENTER);
-		add(downloadProgress, BorderLayout.SOUTH);
-
+		//Set the download Panel to be transparent
+		downloadPanel.setBackground(new Color(0,0,0,0));
+		downloadPanel.setOpaque(false);
+		
+		//Add the JProgressBar to the panel
+		downloadPanel.add(downloadProgress);
+		
+		//Add the Download Panel to the Frame's panel
+		updatePanel.setLayout(new BorderLayout());
+		updatePanel.add(downloadPanel,BorderLayout.SOUTH);
+		
+		//Add the Frame's panel to the frame
+		add(updatePanel);
+		
 		// Removes the TitleBar, the X, minimize, and maximize buttons
 		setUndecorated(true);
 		getRootPane().setWindowDecorationStyle(JRootPane.NONE);
 		// The X doesn't exist any more, but I set the default close operation
 		// anyways...
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		// Transparent JFrame Background
+		setBackground(new Color(0,0,0,0));
+		
+		// Frame Size
 		setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+		
 		// Start window in the center of the main screen
 		setLocationRelativeTo(null);
-
-		setResizable(isConsoleResizable);
 	}
 
 	/**
@@ -246,14 +251,11 @@ public class DSLauncherHead extends JFrame {
 			// Uhhhh... it broke? No really, if this breaks, I think You need to
 			// reinstall Java...
 			// Check the spelling on the updateUrl... it might be wrong?
-			appendLine("Error: URL could not be made.  Double check "
-					+ DEFAULT_FILE_NAME + " to see if it's spelled properly");
+			appendLine("Error: URL could not be made.  Double check " + DEFAULT_FILE_NAME + " to see if it's spelled properly");
 			appendLine(e.getMessage());
-			saveConsoleLog(ERROR_FILENAME + dateFormat.format(new Date())
-					+ ".txt");
+			saveConsoleLog(ERROR_FILENAME + dateFormat.format(new Date()) + ".txt");
 			success = false;
 		}
-
 		getVersionsFromServer();
 	}
 
@@ -327,8 +329,7 @@ public class DSLauncherHead extends JFrame {
 
 		} catch (IOException e) {
 			if (displayErrorMessages)
-				JOptionPane.showMessageDialog(null, "File write error",
-						"Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "File write error", "Error", JOptionPane.ERROR_MESSAGE);
 			appendLine(e.getMessage());
 			success = false;
 		}
@@ -340,14 +341,12 @@ public class DSLauncherHead extends JFrame {
 
 	private void saveConsoleLog(String filename) {
 		try {
-			PrintWriter out = new PrintWriter(new BufferedWriter(
-					new FileWriter(filename)));
-			String output = statusLabel.getText().replace("<br>",
-					System.lineSeparator());
-			output = output.replace("<html>", "");
-			output = output.replace("</html>", "");
+			PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(filename)));
+			
+			statusString = statusString.replace("<html>", "");
+			statusString = statusString.replace("</html>", "");
 
-			out.print(output);
+			out.print(statusString);
 			out.close();
 		} catch (IOException ex) {
 			ex.printStackTrace();
@@ -355,18 +354,15 @@ public class DSLauncherHead extends JFrame {
 					JOptionPane.ERROR_MESSAGE);
 			success = false;
 		}
-
 	}
 
 	/**
 	 * Checks the update.txt file for Versions, and if it finds versions that
 	 * are out of date, then it adds them to the lists to update!
 	 * 
-	 * Modifies: greatestVersionFromServer - When it's through, this will
-	 * represent the latest version released by the server! numOfUpdates - The
-	 * number of updates the program has to install ArrayList<String> versions
-	 * ArrayList<String> downloadUrls ArrayList<String> fileNames
-	 * 
+	 * Modifies: greatestVersionFromServer - When it's through, this will represent the latest version released by the server!
+	 * 			 numOfUpdates - The number of updates the program has to install ArrayList<String> versions
+	 * 			 ArrayList<String> downloadUrls ArrayList<String> fileNames
 	 */
 	private void getVersionsFromServer() {
 		appendLine("Obtaining version from server.");
@@ -375,10 +371,9 @@ public class DSLauncherHead extends JFrame {
 
 		BufferedReader in = null;
 		try {
-			in = new BufferedReader(new InputStreamReader(
-					updateUrl.openStream()));
+			in = new BufferedReader(new InputStreamReader(updateUrl.openStream()));
 			appendLine("Recieved server version reply.");
-
+			
 			String line;
 			while ((line = in.readLine()) != null) {
 				// Splits the string into parts based on semi-colons, and
@@ -404,7 +399,7 @@ public class DSLauncherHead extends JFrame {
 					} else if (compareVersion(updateParts[0],
 							greatestVersionFromServer) == OUT_OF_DATE) {
 						appendLine("Update.txt doesn't look right.");
-						appendLine("Updates out of order.  Contact your Neighboorhood Server Admin\n");
+						appendLine("Updates out of order.  Contact your Neighboorhood Server Admin" + System.lineSeparator());
 						appendLine("Ignoring all updates and ignoring check.");
 						success = false;
 						greatestVersionFromServer = versionFromFile;
@@ -412,7 +407,7 @@ public class DSLauncherHead extends JFrame {
 					}
 				} else {
 					appendLine("Update.txt doesn't look right.");
-					appendLine("Expected: Version; DownloadURL; FileName\n");
+					appendLine("Expected: Version; DownloadURL; FileName" + System.lineSeparator());
 					appendLine("Ignoring all updates and ignoring check.");
 					success = false;
 					greatestVersionFromServer = versionFromFile;
@@ -439,14 +434,15 @@ public class DSLauncherHead extends JFrame {
 
 	/**
 	 * Compares two version Strings using their hashcodes. Longer Versions
-	 * (Parts separated by periods) are considered "more up to date" 1.1.0 is
-	 * greater than 1.0.0 1.1.0 is greater than 1.0.999 a.0.0 is greater than
-	 * 1.1.1 9.0 is greater than 1.0.0 1.0.0 is greater than 1.0
+	 * (Parts separated by periods) are considered "more up to date"
+	 * 1.1.0 is greater than 1.0.0
+	 * 1.1.0 is greater than 1.0.999
+	 * a.0.0 is greater than 1.1.1
+	 * 9.0 is greater than 1.0.0
+	 * 1.0.0 is greater than 1.0
 	 * 
-	 * @param vf
-	 *            First Version String
-	 * @param vs
-	 *            Second Version String
+	 * @param vf First Version String
+	 * @param vs  Second Version String
 	 * @return Whether the first version is greater, than the second version,
 	 *         equal to, or out of date.
 	 */
@@ -500,8 +496,7 @@ public class DSLauncherHead extends JFrame {
 				appendLine("Starting Download: " + fileNames.get(i));
 				try {
 					appendLine("Downloading Update: Please Wait...");
-					downloadFromURL(new URL(downloadUrls.get(i)),
-							fileNames.get(i));
+					downloadFromURL(new URL(downloadUrls.get(i)), fileNames.get(i));
 				} catch (IOException e) {
 					appendLine("File downloading Error!");
 					appendLine(e.getMessage());
@@ -511,8 +506,8 @@ public class DSLauncherHead extends JFrame {
 
 				appendLine("Installing: " + versions.get(i));
 
-				appendLine("Extracting " + fileNames.get(i) + " to "
-						+ System.getProperty("user.dir"));
+				appendLine("Extracting " + fileNames.get(i) + " to " + System.getProperty("user.dir"));
+				downloadProgress.setString("Extrating " + fileNames.get(i) + " to local directory");
 				try {
 					ExtractItemsStandard.extract(fileNames.get(i));
 				} catch (Exception e) {
@@ -529,13 +524,10 @@ public class DSLauncherHead extends JFrame {
 					String line = in.readLine();
 					while (line != null) {
 						// Works on windows installations
-						line = line.replaceAll("/",
-								Matcher.quoteReplacement(File.separator));
+						line = line.replaceAll("/", Matcher.quoteReplacement(File.separator));
 
-						// Next line doesn't work... but may be necessary for
-						// Linux distro's
-						// line = line.replaceAll("\\",
-						// Matcher.quoteReplacement(File.separator));
+						// Next line doesn't work... but may be necessary for Linux distro's
+						// line = line.replaceAll("\\", Matcher.quoteReplacement(File.separator));
 
 						appendLine("Removing " + line);
 						Files.deleteIfExists(Paths.get(line));
@@ -591,12 +583,9 @@ public class DSLauncherHead extends JFrame {
 	 * Downloads a file hosted at a given URL, and stores it as a local file (in
 	 * the running directory) with the given name
 	 * 
-	 * @param url
-	 *            - Where the file is hosted
-	 * @param localFilename
-	 *            - What to save the file as
-	 * @throws IOException
-	 *             - Errors that occur using the FileOutputStream
+	 * @param url - Where the file is hosted
+	 * @param localFilename - What to save the file as
+	 * @throws IOException - Errors that occur using the FileOutputStream
 	 */
 	void downloadFromURL(URL url, String localFilename) throws IOException {
 		InputStream i = null;
@@ -608,12 +597,11 @@ public class DSLauncherHead extends JFrame {
 			connection.connect();
 
 			i = connection.getInputStream(); // get connection inputstream
-			f = new FileOutputStream(localFilename); // open outputstream to
-														// local file
-			int downloaded = 0;
+			f = new FileOutputStream(localFilename); // open outputstream to local file
+			double downloaded = 0.0;
 			int fileSize = connection.getContentLength();
 
-			downloadProgress.setMaximum(fileSize);
+			//downloadProgress.setMaximum(fileSize);
 			downloadProgress.setIndeterminate(false);
 
 			byte[] buffer = new byte[BUFFER_SIZE];
@@ -626,7 +614,7 @@ public class DSLauncherHead extends JFrame {
 				if (fileSize > 0) {
 					downloaded += len;
 					// System.out.println(downloaded + "/" + fileSize + " kB");
-					downloadProgress.setValue(downloaded);
+					downloadProgress.setValue((int) (100*downloaded/fileSize));
 				}
 			}
 		} finally {
@@ -639,17 +627,36 @@ public class DSLauncherHead extends JFrame {
 			downloadProgress.setIndeterminate(true);
 		}
 	}
-
+	
 	/**
 	 * Appends the given string to the statusLabel JLabel
 	 * 
-	 * @param str
-	 *            String to append
+	 * @param str String to append
 	 */
 	public void appendLine(String str) {
 		System.out.println(str);
-		str.replace("\\n", "<br>");
-		statusString += str + "<br>";
-		statusLabel.setText("<html>" + statusString + "</html>");
+		statusString += (str + System.lineSeparator());
+		downloadProgress.setString(str);
+	}
+	
+	private class DrawBackground extends JPanel {
+		/* Makes that stupid dependency warning go away... */
+		private static final long serialVersionUID = 1L;
+
+		public DrawBackground() {
+			setBackground(new Color(0,0,0,0));
+			setOpaque(false);
+		}
+		
+		@Override
+		public void paint(Graphics g) {
+			try {
+				background = ImageIO.read(backgroundImageLocation);
+				g.drawImage(background, 0, 0, null);
+			} catch (IOException e) {
+				appendLine("Error: Couldn't Open " + backgroundImageLocation);
+				appendLine(e.getMessage());
+			}	
+		}
 	}
 }

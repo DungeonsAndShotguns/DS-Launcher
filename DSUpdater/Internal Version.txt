@@ -1,1 +1,1 @@
-Updater Version: 1.0.0.3
+Internal Version: 1.0.0.4
