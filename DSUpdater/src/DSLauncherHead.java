@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -60,7 +62,10 @@ public class DSLauncherHead extends JFrame {
 	private String greatestVersionFromServer;
 
 	private int numOfUpdates;
-
+	private int posX;
+	private int posY;
+	
+	
 	private ArrayList<String> versions;
 	private ArrayList<String> downloadUrls;
 	private ArrayList<String> fileNames;
@@ -236,6 +241,26 @@ public class DSLauncherHead extends JFrame {
 		
 		// Start window in the center of the main screen
 		setLocationRelativeTo(null);
+		
+		//Add Mouse Dragging support!
+		this.addMouseListener(new MouseAdapter()
+		{
+		   public void mousePressed(MouseEvent e)
+		   {
+		      posX=e.getX();
+		      posY=e.getY();
+		   }
+		});
+		
+		this.addMouseMotionListener(new MouseAdapter()
+		{
+		     public void mouseDragged(MouseEvent evt)
+		     {
+				//sets frame position when mouse dragged			
+				setLocation (evt.getXOnScreen()-posX,evt.getYOnScreen()-posY);
+							
+		     }
+		});
 	}
 
 	/**
