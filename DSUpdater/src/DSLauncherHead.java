@@ -67,7 +67,6 @@ public class DSLauncherHead extends JFrame {
 	private int posX;
 	private int posY;
 	
-	
 	private ArrayList<String> versions;
 	private ArrayList<String> downloadUrls;
 	private ArrayList<String> fileNames;
@@ -677,19 +676,29 @@ public class DSLauncherHead extends JFrame {
 		public DrawBackground() {
 			setBackground(new Color(0,0,0,0));
 			setOpaque(false);
+			background = null;
+			icon = null;
+			
 			try {
 				background = ImageIO.read(backgroundImageLocation);
-				icon = ImageIO.read(iconImageLocation);
 			} catch (IOException e) {
 				appendLine("Error: Couldn't Open " + backgroundImageLocation);
+				appendLine(e.getMessage());
+			}
+			try {
+				icon = ImageIO.read(iconImageLocation);
+			} catch (IOException e) {
+				appendLine("Error: Couldn't Open " + iconImageLocation);
 				appendLine(e.getMessage());
 			}	
 		}
 		
 		@Override
 		public void paint(Graphics g) {
-			g.drawImage(background, 23, 11, null);
-			g.drawImage(icon, 0, 0, null);
+			if (background != null)
+				g.drawImage(background, 23, 11, null);
+			if (icon != null)
+				g.drawImage(icon, 0, 0, null);
 		}
 	}
 }
