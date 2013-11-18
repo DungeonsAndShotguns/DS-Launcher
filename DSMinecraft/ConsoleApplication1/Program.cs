@@ -26,6 +26,12 @@ namespace DSMinecraft
                 Update.Start();
                 Update.WaitForExit();
             }
+            else
+            {
+                System.Windows.Forms.MessageBox.Show("No Updater found, skipping updating.", "No Updater", System.Windows.Forms.MessageBoxButtons.OK);
+            }
+
+
 
             Process Minecraft = new Process();
             Minecraft.StartInfo.UseShellExecute = false;
