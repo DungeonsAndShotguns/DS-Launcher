@@ -219,18 +219,18 @@ public class DSLauncherHead extends JFrame {
 		    }
 		  });
 		
-		//Set the download Panel to be transparent
+		// Set the download Panel to be transparent
 		downloadPanel.setBackground(new Color(0,0,0,0));
 		downloadPanel.setOpaque(false);
 		
-		//Add the JProgressBar to the panel
+		// Add the JProgressBar to the panel
 		downloadPanel.add(downloadProgress);
 		
-		//Add the Download Panel to the Frame's panel
+		// Add the Download Panel to the Frame's panel
 		updatePanel.setLayout(new BorderLayout());
 		updatePanel.add(downloadPanel,BorderLayout.SOUTH);
 		
-		//Add the Frame's panel to the frame
+		// Add the Frame's panel to the frame
 		add(updatePanel);
 		
 		// Removes the TitleBar, the X, minimize, and maximize buttons
