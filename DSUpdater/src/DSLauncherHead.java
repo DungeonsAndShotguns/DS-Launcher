@@ -4,9 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -52,8 +52,8 @@ public class DSLauncherHead extends JFrame {
 	private JPanel downloadPanel;
 	private JPanel updatePanel;
 	private JProgressBar downloadProgress;
-	private Image background;
-	private Image icon;
+	private BufferedImage background;
+	private BufferedImage icon;
 	
 	/* Instance Variables */
 	private URL updateUrl;
@@ -85,14 +85,17 @@ public class DSLauncherHead extends JFrame {
 	/** File Date Format **/
 	private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
 
-	/** System Application Name **/
-	private final String name = "DSUpdater";
+	/** System Application Name/Filename **/
+	private final String name = "DSUpdater.jar";
 
+	/** Folder for Log Files **/
+	private final String LOG_FOLER_NAME = "logs";
+	
 	/** DS Update Log Filename (The Date will be Appended onto the end of this **/
-	private final String UPDATE_FILENAME = "DS Update Log ";
+	private final String UPDATE_FILENAME_LOCATION = LOG_FOLER_NAME + File.separator + "DS Update Log ";
 
 	/** DS Error Log Filename (The Date will be Appended onto the end of this **/
-	private final String ERROR_FILENAME = "DS Error Log ";
+	private final String ERROR_FILENAME_LOCATION = LOG_FOLER_NAME + File.separator + "DS Error Log ";
 
 	/** DS Launcher Properties Filename **/
 	private final String DEFAULT_FILE_NAME = "version.txt";
@@ -158,7 +161,7 @@ public class DSLauncherHead extends JFrame {
 			appendLine("Server Version: " + greatestVersionFromServer);
 			appendLine("Local Version: " + versionFromFile);
 
-			saveConsoleLog(ERROR_FILENAME + dateFormat.format(new Date()) + ".txt");
+			saveConsoleLog(ERROR_FILENAME_LOCATION + dateFormat.format(new Date()) + ".txt");
 			if (displayErrorMessages)
 				JOptionPane.showMessageDialog(null,
 						"You appear to be a couple versions ahead of us." + System.lineSeparator() + "Did you modify "
@@ -171,18 +174,17 @@ public class DSLauncherHead extends JFrame {
 			saveToTextFile(DEFAULT_FILE_NAME);
 
 			if (success) {
-				saveConsoleLog(UPDATE_FILENAME + dateFormat.format(new Date()) + ".txt");
+				saveConsoleLog(UPDATE_FILENAME_LOCATION + dateFormat.format(new Date()) + ".txt");
 				if (displayUpdateMessages)
 					JOptionPane.showMessageDialog(null, "Your version was updated to " +
 							greatestVersionFromServer, "Updated", JOptionPane.PLAIN_MESSAGE);
 			} else {
-				saveConsoleLog(ERROR_FILENAME + dateFormat.format(new Date()) + ".txt");
+				saveConsoleLog(ERROR_FILENAME_LOCATION + dateFormat.format(new Date()) + ".txt");
 				if (displayErrorMessages)
-					JOptionPane.showMessageDialog(null, name + " Encountered a Failure: " + greatestVersionFromServer,
-							"Warning", JOptionPane.WARNING_MESSAGE);
+					JOptionPane.showMessageDialog(null, name + " has Encountered an Error", "Warning", JOptionPane.WARNING_MESSAGE);
 			}
 
-		} else if (versionStatus == EQUAL) {
+		} else if (versionStatus == EQUAL && success) {
 			appendLine("You are up to date!");
 		}
 		
@@ -194,6 +196,8 @@ public class DSLauncherHead extends JFrame {
 	 * instantiation
 	 */
 	private void preInit() {
+		new File(LOG_FOLER_NAME).mkdir();
+		
 		statusString = "";
 		versions = new ArrayList<String>();
 		downloadUrls = new ArrayList<String>();
@@ -283,7 +287,7 @@ public class DSLauncherHead extends JFrame {
 			// Check the spelling on the updateUrl... it might be wrong?
 			appendLine("Error: URL could not be made.  Double check " + DEFAULT_FILE_NAME + " to see if it's spelled properly");
 			appendLine(e.getMessage());
-			saveConsoleLog(ERROR_FILENAME + dateFormat.format(new Date()) + ".txt");
+			saveConsoleLog(ERROR_FILENAME_LOCATION + dateFormat.format(new Date()) + ".txt");
 			success = false;
 		}
 		getVersionsFromServer();
@@ -372,9 +376,6 @@ public class DSLauncherHead extends JFrame {
 	private void saveConsoleLog(String filename) {
 		try {
 			PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(filename)));
-			
-			statusString = statusString.replace("<html>", "");
-			statusString = statusString.replace("</html>", "");
 
 			out.print(statusString);
 			out.close();
@@ -447,8 +448,8 @@ public class DSLauncherHead extends JFrame {
 		} catch (Exception e) {
 			appendLine("Couldn't recieve response from server, ignoring updates");
 			appendLine(e.getMessage());
-			success = false;
 			greatestVersionFromServer = versionFromFile;
+			success = false;
 		} finally {
 			if (in != null) {
 				try {
@@ -530,6 +531,7 @@ public class DSLauncherHead extends JFrame {
 				} catch (IOException e) {
 					appendLine("File downloading Error!");
 					appendLine(e.getMessage());
+					greatestVersionFromServer = versionFromFile;
 					success = false;
 					return;
 				}
@@ -537,7 +539,7 @@ public class DSLauncherHead extends JFrame {
 				appendLine("Installing: " + versions.get(i));
 
 				appendLine("Extracting " + fileNames.get(i) + " to " + System.getProperty("user.dir"));
-				downloadProgress.setString("Extrating " + fileNames.get(i) + " to local directory");
+				downloadProgress.setString("Extracting " + fileNames.get(i) + " to local directory");
 				try {
 					statusString = ExtractItemsStandard.extract(fileNames.get(i), statusString);
 				} catch (Exception e) {
@@ -646,7 +648,9 @@ public class DSLauncherHead extends JFrame {
 					// System.out.println(downloaded + "/" + fileSize + " kB");
 					downloadProgress.setValue((int) (100*downloaded/fileSize));
 				}
-			}
+			} 
+		} catch (IOException e) {
+			throw new IOException("The URL could not be instantiated: " + url.toString());
 		} finally {
 			if (f != null) {
 				f.close();
@@ -681,13 +685,13 @@ public class DSLauncherHead extends JFrame {
 			
 			try {
 				background = ImageIO.read(backgroundImageLocation);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				appendLine("Error: Couldn't Open " + backgroundImageLocation);
 				appendLine(e.getMessage());
 			}
 			try {
 				icon = ImageIO.read(iconImageLocation);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				appendLine("Error: Couldn't Open " + iconImageLocation);
 				appendLine(e.getMessage());
 			}	
