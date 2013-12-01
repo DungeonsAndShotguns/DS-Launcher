@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -32,7 +31,7 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
-import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -52,8 +51,8 @@ public class DSLauncherHead extends JFrame {
 	private JPanel downloadPanel;
 	private JPanel updatePanel;
 	private JProgressBar downloadProgress;
-	private BufferedImage background;
-	private BufferedImage icon;
+	private ImageIcon background;
+	private ImageIcon logo;
 	
 	/* Instance Variables */
 	private URL updateUrl;
@@ -107,10 +106,10 @@ public class DSLauncherHead extends JFrame {
 	private final String DEFAULT_VERSION = "";
 
 	/** Background image file **/
-	private final File backgroundImageLocation = new File("bin" + File.separator + "assets" + File.separator + "DSUpdater" + new Random().nextInt(5) + ".png");
+	private final String backgroundImageLocation = "assets/DSUpdater" + new Random().nextInt(5) + ".png";
 	
 	/** Background image file **/
-	private final File iconImageLocation = new File("bin" + File.separator + "assets" + File.separator + "DSIcon.png");
+	private final String logoImageLocation = "assets/DSIcon.png";
 	
 	/** Pixel Width of Window **/
 	private final int DEFAULT_WIDTH = 646;
@@ -207,20 +206,25 @@ public class DSLauncherHead extends JFrame {
 		UIManager.put("ProgressBar.selectionForeground", new Color(75,75,75));
 		UIManager.put("ProgressBar.horizontalSize", new Dimension(DEFAULT_WIDTH-100, 20));
 		
-		downloadPanel = new JPanel();
-		updatePanel = new DrawBackground();
-		downloadProgress = new JProgressBar();
 		
+		downloadProgress = new JProgressBar();
 		downloadProgress.setSize(new Dimension(DEFAULT_WIDTH-100, 20));
 		downloadProgress.setIndeterminate(true);
 		downloadProgress.setStringPainted(true);
 		downloadProgress.addChangeListener(new ChangeListener() {
-		    @Override
+			@Override
 			public void stateChanged(ChangeEvent e) {
 		    	downloadProgress.setString(String.format("Downloading: " + "" + " %s%%",
 		    			downloadProgress.getValue()));
 		    }
 		  });
+		
+		downloadPanel = new JPanel();
+		updatePanel = new DrawBackground();
+		
+		
+		
+		    
 		
 		// Set the download Panel to be transparent
 		downloadPanel.setBackground(new Color(0,0,0,0));
@@ -624,8 +628,7 @@ public class DSLauncherHead extends JFrame {
 		FileOutputStream f = null;
 
 		try {
-			HttpURLConnection connection = (HttpURLConnection) url
-					.openConnection();
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.connect();
 
 			i = connection.getInputStream(); // get connection inputstream
@@ -668,41 +671,47 @@ public class DSLauncherHead extends JFrame {
 	 * @param str String to append
 	 */
 	public void appendLine(String str) {
-		System.out.println(str);
-		statusString += (str + System.lineSeparator());
-		downloadProgress.setString(str);
+		if (str != null) {
+			System.out.println(str);
+			statusString += (str + System.lineSeparator());
+			downloadProgress.setString(str);//Instantiate this first
+		}
 	}
 	
 	private class DrawBackground extends JPanel {
 		/* Makes that stupid dependency warning go away... */
 		private static final long serialVersionUID = 1L;
 
+		URL imageURL;
+		
 		public DrawBackground() {
 			setBackground(new Color(0,0,0,0));
 			setOpaque(false);
 			background = null;
-			icon = null;
+			logo = null;
 			
-			try {
-				background = ImageIO.read(backgroundImageLocation);
-			} catch (Exception e) {
-				appendLine("Error: Couldn't Open " + backgroundImageLocation);
-				appendLine(e.getMessage());
-			}
-			try {
-				icon = ImageIO.read(iconImageLocation);
-			} catch (Exception e) {
-				appendLine("Error: Couldn't Open " + iconImageLocation);
-				appendLine(e.getMessage());
-			}	
+			imageURL = this.getClass().getClassLoader().getResource(backgroundImageLocation);
+	        if  (imageURL != null) {
+	            background = new ImageIcon(imageURL);
+	        } else {
+	        	appendLine("Warning: Internal Background file missing at:");
+	        	appendLine(backgroundImageLocation);
+	        }
+	        
+	        imageURL = this.getClass().getClassLoader().getResource(logoImageLocation);
+	        if  (imageURL != null) {
+	            logo = new ImageIcon(imageURL);
+	        } else {
+	        	appendLine("Warning: Internal Icon file missing at:");
+	        }
 		}
 		
 		@Override
 		public void paint(Graphics g) {
 			if (background != null)
-				g.drawImage(background, 23, 11, null);
-			if (icon != null)
-				g.drawImage(icon, 0, 0, null);
+				background.paintIcon(this, g, 23, 11);
+			if (logo != null)
+				logo.paintIcon(this, g, 0, 0);
 		}
 	}
 }
