@@ -5,11 +5,14 @@ using System.Text;
 
 namespace DSLPackager
 {
+    
     class Program
     {
+        [STAThread]
         static void Main(string[] args)
         {
-            Tests.TestDSMC();
+            Form1 PackageScreen = new Form1();
+            System.Windows.Forms.Application.Run(PackageScreen);
         }
     }
 }
