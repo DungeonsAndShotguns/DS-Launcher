@@ -59,6 +59,7 @@
             this.tbx_VersionNumber.Name = "tbx_VersionNumber";
             this.tbx_VersionNumber.Size = new System.Drawing.Size(135, 20);
             this.tbx_VersionNumber.TabIndex = 1;
+            this.tbx_VersionNumber.Text = "1.2.8.4";
             // 
             // label2
             // 
@@ -75,6 +76,7 @@
             this.tbx_UpdateURL.Name = "tbx_UpdateURL";
             this.tbx_UpdateURL.Size = new System.Drawing.Size(286, 20);
             this.tbx_UpdateURL.TabIndex = 3;
+            this.tbx_UpdateURL.Text = "http://Test.test";
             // 
             // rtb_BlackList
             // 
@@ -108,6 +110,7 @@
             this.tbx_RootDir.Name = "tbx_RootDir";
             this.tbx_RootDir.Size = new System.Drawing.Size(207, 20);
             this.tbx_RootDir.TabIndex = 7;
+            this.tbx_RootDir.Text = "C:\\Users\\vanproyaa\\Desktop\\base";
             // 
             // btn_BrowseRoot
             // 
@@ -134,6 +137,7 @@
             this.tbx_UpdateList.Name = "tbx_UpdateList";
             this.tbx_UpdateList.Size = new System.Drawing.Size(207, 20);
             this.tbx_UpdateList.TabIndex = 10;
+            this.tbx_UpdateList.Text = "C:\\Users\\vanproyaa\\Desktop\\update.txt";
             // 
             // btn_BrowseUpdateList
             // 

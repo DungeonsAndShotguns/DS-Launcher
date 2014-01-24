@@ -90,6 +90,7 @@ namespace DSLPackager
             using (StreamWriter versionSteam = new StreamWriter(RootPath + "\\Version.txt"))
             {
                 versionSteam.WriteLine(VersionNumber);
+                versionSteam.WriteLine(UpdateURL);
                 versionSteam.Flush();
             }
         }
@@ -132,8 +133,8 @@ namespace DSLPackager
         private void CompressUpdate()
         {
             SevenZipCompressor Compress = new SevenZipCompressor(FileToDownload);
-
-            Compress.CompressDirectory(RootPath, "DS" + VersionNumber.Replace(".", "") + ".7zip");
+            Compress.ArchiveFormat = OutArchiveFormat.SevenZip;
+            Compress.CompressDirectory(RootPath, "DS" + VersionNumber.Replace(".", "") + ".7z");
         }
     }
 }

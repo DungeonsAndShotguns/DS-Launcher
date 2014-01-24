@@ -41,11 +41,11 @@ namespace DSLPackager
             string fileName = string.Empty;
             if(tbx_VersionNumber.Text.Contains('.') == true)
             {
-                fileName = "DS" + tbx_VersionNumber.Text.Replace(".", "") + ".7zip";
+                fileName = "DS" + tbx_VersionNumber.Text.Replace(".", "") + ".7z";
             }
             else
             {
-                fileName = "DS" + tbx_VersionNumber.Text + ".7zip";
+                fileName = "DS" + tbx_VersionNumber.Text + ".7z";
             }
 
             Package packageCreation = new Package(tbx_VersionNumber.Text, tbx_RootDir.Text, tbx_UpdateList.Text, blackListItems, ".files.blacklist", tbx_UpdateURL.Text, fileName);
