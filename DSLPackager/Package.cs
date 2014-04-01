@@ -108,7 +108,7 @@ namespace DSLPackager
                 versionSteam = new StreamWriter("update.txt");
             }
 
-            versionSteam.WriteLine(VersionNumber + ";" + UpdateURL + ";" + FileToDownload);
+            versionSteam.WriteLine(VersionNumber + ";" + UpdateURL + "//" + FileToDownload + ";" + FileToDownload);
             versionSteam.Flush();
             versionSteam.Dispose();
         }
@@ -132,9 +132,9 @@ namespace DSLPackager
 
         private void CompressUpdate()
         {
-            SevenZipCompressor Compress = new SevenZipCompressor(FileToDownload);
+            SevenZipCompressor Compress = new SevenZipCompressor(FileToDownload+ "P");
             Compress.ArchiveFormat = OutArchiveFormat.SevenZip;
-            Compress.CompressDirectory(RootPath, "DS" + VersionNumber.Replace(".", "") + ".7z");
+            Compress.CompressDirectory(RootPath, "DS" + VersionNumber.Replace(".", "") + ".7z", true);
         }
     }
 }
