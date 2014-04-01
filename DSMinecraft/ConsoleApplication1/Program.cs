@@ -23,6 +23,10 @@ namespace DSMinecraft
                 Process Update = new Process();
                 Update.StartInfo.FileName = "java";
                 Update.StartInfo.Arguments = "-jar DSUpdater.jar";
+                Update.StartInfo.RedirectStandardOutput = true;
+                Update.StartInfo.RedirectStandardError = true;
+                Update.StartInfo.UseShellExecute = false;
+                Update.StartInfo.CreateNoWindow = true;
                 Update.Start();
                 Update.WaitForExit();
             }
