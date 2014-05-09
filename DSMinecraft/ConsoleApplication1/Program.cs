@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DropNet;
 using MinecraftHelper;
 
 namespace DSMinecraft
@@ -45,6 +46,30 @@ namespace DSMinecraft
             Minecraft.Start();
         }
 
+        // sync files to dropbox
+        public void SyncImages()
+        {
+            Directory.GetFiles(Directory.GetCurrentDirectory() + "\\data\\.minecraft\\screenshots");
+
+            
+
+            DropNetClient DBSync = new DropNetClient("e9ual7mwmguugna", "bqxh4qdndgfxgps");
+            DBSync.GetToken();
+
+            string AURL = DBSync.BuildAuthorizeUrl();
+            System.Diagnostics.Process AuthProcess = new Process();
+            ProcessStartInfo AuthInfo = new ProcessStartInfo(AURL);
+            AuthProcess.StartInfo = AuthInfo;
+            AuthProcess.WaitForExit();
+            AuthProcess.Start();
+
+            DropNet.Models.UserLogin CurrentLogin = DBSync.GetAccessToken();
+
+            DBSync.UploadFile("/Screenshoots", 
+
+        }
+
+        // currently no used
         public static string CheckVersion(string VersionFileDir)
         {
             string RemoteVersion = string.Empty;
