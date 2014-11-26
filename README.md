@@ -20,5 +20,5 @@ The change means that our luncher should now be mono complient
 and we should not break when Mojang makes changes to there luncher
 or login process.
 
-The old luncher is in the 2.0 branch if you woul like to use the old 
+The old luncher is in the 2.0 branch if you would like to use the old 
 code.
