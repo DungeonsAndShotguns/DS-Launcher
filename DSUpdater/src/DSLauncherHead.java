@@ -312,7 +312,7 @@ public class DSLauncherHead extends JFrame {
 
 	private void closeGUI() {
 		dispose();
-		System.exit(1);
+		System.exit(0);
 	}
 
 	private void loadFromTextFile(String filename) {
