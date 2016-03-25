@@ -15,6 +15,10 @@ namespace DSMinecraft
 
         public Updating()
         {
+            //BackColor = Color.LimeGreen;
+            //TransparencyKey = Color.LimeGreen;
+            //FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+
             InitializeComponent();
         }
 

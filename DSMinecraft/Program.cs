@@ -14,13 +14,12 @@ namespace DSMinecraft
 {
     class Program
     {
+        public static Updating window = new Updating();
+
         static void Main(string[] args)
         {
             BGOperations bg = new BGOperations();
 
-            Updating window = new Updating();
-            //window.BackColor = Color.LimeGreen;
-            //window.TransparencyKey = Color.LimeGreen; 
             window.Show();
 
             if (!File.Exists("MultiMC.exe"))
@@ -44,6 +43,31 @@ namespace DSMinecraft
                     window.Update();
                 }
             }
+
+            DirectoryInfo root = new DirectoryInfo(Directory.GetCurrentDirectory() + "\\instances");
+
+            foreach(DirectoryInfo currentInstance in root.GetDirectories())
+            {
+                //bool foundUpdater = false;
+
+                foreach(FileInfo currentFile in currentInstance.GetFiles())
+                {
+                    if(currentFile.Name == "DSUpdater.jar")
+                    {
+                        Process DsUpdate = new Process();
+                        DsUpdate.StartInfo.FileName = "java";
+                        DsUpdate.StartInfo.Arguments = @"-jar " + currentFile.FullName;
+                        DsUpdate.StartInfo.UseShellExecute = false;
+                        DsUpdate.StartInfo.WorkingDirectory = currentInstance.FullName + "\\minecraft";
+                        DsUpdate.Start();
+                        DsUpdate.WaitForExit();
+
+                        
+                    }
+                }
+            }
+
+
 
             Process Minecraft = new Process();
             Minecraft.StartInfo.FileName = "MultiMC.exe";
@@ -124,6 +148,7 @@ namespace DSMinecraft
                     Download(currentLink, "temp" + fileCount + ".zip");
                     Unzip("temp" + fileCount + ".zip");
                     fileCount++;
+                    window.Update();
                 }
             }
 
